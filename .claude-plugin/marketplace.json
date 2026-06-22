@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "osobisty-asystent",
+  "description": "Osobisty Asystent AI — plugin Akademii Automatyzacji do zbudowania własnego asystenta w Obsidian + Claude Code. Onboarding + system zadań + codzienne skille.",
+  "owner": {
+    "name": "AIBIZ Sp. z o.o.",
+    "email": "kontakt@akademiaautomatyzacji.com",
+    "url": "https://akademiaautomatyzacji.com"
+  },
+  "plugins": [
+    {
+      "name": "osobisty-asystent",
+      "source": "./plugins/osobisty-asystent",
+      "description": "Wizard onboarding + Personal OS (zadania, dashboard, pamięć, kalibracja stylu) dla społeczności Akademii Automatyzacji."
+    }
+  ]
+}
