@@ -57,6 +57,21 @@ Po skończonym onboardingu masz gotowy system. `NOW.md` powstanie sam przy pierw
 
 Skill `/daily` może pokazać Twój kalendarz Google w porannym raporcie. Wymaga skilla `gog` i adresu Google podanego w konfiguracji pluginu (`gog_account`). Bez tego `/daily` działa normalnie, tylko bez sekcji kalendarza.
 
+## Zaawansowane — asystent w kieszeni (Poziom 2)
+
+- `/zdalna-sesja` — odpala i pilnuje sesji Claude Code na Twoim serwerze (VPS) z lokalnego komputera. Uruchamiasz nazwane sesje, które żyją w tle (`tmux`) i sterujesz nimi z telefonu przez Remote Control — bez wchodzenia ręcznie na serwer.
+
+Ten skill zakłada, że masz już asystenta postawionego w chmurze (VPS + Obsidian Sync + Puls — z lekcji Poziomu 2). W pliku `.env` w roocie vaulta dodaj, jak dostać się do serwera:
+
+```
+VPS_SSH=vps          # alias z ~/.ssh/config (ma przypięty klucz) — zalecane
+# albo, dla świeżego serwera z logowaniem na root:
+VPS_HOST=<ip-serwera>
+VPS_RUN_AS=claude
+```
+
+Wymaga działającego dostępu SSH do VPS oraz Claude Code w wersji ≥ 2.1.51 na serwerze (Remote Control). Komendy: `new <nazwa>` (nowa sesja), `list` (żywe sesje), `kill <nazwa>`, `attach <nazwa>`.
+
 ---
 
 Akademia Automatyzacji — https://akademiaautomatyzacji.com
