@@ -348,7 +348,7 @@ Zapamiętaj co zostało utworzone (potrzebne w kroku 12).
 **Wyświetl tekst (bez pytań):**
 
 ```
-📦 Twój system ma 4 wbudowane skille — działają od razu:
+📦 Twój system ma 5 wbudowanych skilli — działają od razu:
 
 /daily            — codzienne porządki: archiwizacja zrobionych zadań,
                     regeneracja dashboardu, raport co nowego
@@ -358,6 +358,8 @@ Zapamiętaj co zostało utworzone (potrzebne w kroku 12).
                     Twoje pliki kontekstowe (persona.md, soul.md, voice-of-tone.md)
 /utworz-zadanie   — tworzy zadanie w systemie Obsidian z priorytetem,
                     terminem i projektem
+/skill-scout      — raz w tygodniu przegląda Twoje logi i wyławia powtarzalną
+                    ręczną robotę, którą warto opakować w kolejny skill
 
 Wszystkie działają od razu — wystarczy wpisać /nazwa w Claude Code.
 Dodatkowe skille (email, social media, generowanie grafik...) to osobny
@@ -397,6 +399,7 @@ Wiersz `content/ai-writing-patterns.md` wpisuj ZAWSZE (plik kopiowany bezwarunko
 - `memory-update` - aktualizacja NOW.md (bieżący kontekst pracy) z logów sesji
 - `reflect` - walidacja obserwacji o użytkowniku → aktualizacja plików kontekstowych
 - `utworz-zadanie` - tworzenie nowego zadania w systemie Obsidian
+- `skill-scout` - tygodniowy przegląd logów: wykrywa powtarzalną ręczną robotę do opakowania w skill
 ```
 
 **{{FOLDER_STRUCTURE}}** — mapa workspace na podstawie FAKTYCZNIE utworzonych folderów:
