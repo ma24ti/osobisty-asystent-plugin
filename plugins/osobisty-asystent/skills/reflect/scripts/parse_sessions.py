@@ -16,6 +16,7 @@ Output: czysty dialog na stdout, statystyki na stderr
 """
 
 import os
+import re
 import sys
 import json
 import datetime
@@ -52,15 +53,10 @@ def get_sessions_dirs():
     This function finds ALL matching dirs to avoid missing sessions.
     """
     cwd = os.environ.get('MEMORY_UPDATE_WORKSPACE', os.getcwd())
-    # Claude Code converts path to ID — cross-platform: /, \, :, space, _ → -
-    workspace_id = (cwd.replace('/', '-')
-                       .replace('\\', '-')
-                       .replace(':', '-')
-                       .replace(' ', '-')
-                       .replace('_', '-'))
-    # Leading '-' tylko gdy ścieżka zaczyna się od '/' (Unix). Na Windows (C:\...) — bez.
-    if cwd.startswith('/') and not workspace_id.startswith('-'):
-        workspace_id = '-' + workspace_id
+    # Claude Code converts path to ID — KAŻDY znak niealfanumeryczny → '-'
+    # (nie tylko /, \, :, spacja, _ — także !, ., #, ~ itd.)
+    # Leading '-' powstaje sam: '/Users/...' → '-Users-...', 'C:\...' → 'C--...'
+    workspace_id = re.sub(r'[^A-Za-z0-9]', '-', cwd)
 
     projects_base = os.path.expanduser("~/.claude/projects/")
     if not os.path.isdir(projects_base):
