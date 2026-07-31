@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "{{PLUGIN}}",
+  "displayName": "{{DISPLAY_NAME}}",
+  "description": "{{OPIS}}",
+  "author": {
+    "name": "{{WLASCICIEL}}",
+    "url": "https://github.com/{{ORG}}"
+  },
+  "homepage": "https://github.com/{{ORG}}/{{REPO}}",
+  "repository": "https://github.com/{{ORG}}/{{REPO}}",
+  "license": "UNLICENSED",
+  "keywords": [
+    "{{PLUGIN}}",
+    "claude-code"
+  ]
+}

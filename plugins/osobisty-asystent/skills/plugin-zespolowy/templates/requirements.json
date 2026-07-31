@@ -1,0 +1,3 @@
+{
+  "$comment": "Manifest wymagań skilli. Sekrety NIE jadą w repo — tu jest tylko informacja, czego skill potrzebuje i skąd to wziąć. Typ: firmowy = jeden klucz firmy, bierzesz od admina przez menedżer haseł; osobisty = generujesz sam na swoim koncie. Przykład wpisu: \"moj-skill\": { \"env\": [\"MOJ_API_KEY\"], \"skad\": \"panel.przyklad.pl → API keys\", \"typ\": \"firmowy\" }"
+}

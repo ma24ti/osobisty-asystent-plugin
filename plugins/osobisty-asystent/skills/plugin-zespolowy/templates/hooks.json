@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/sync-company-context.js\"",
+            "timeout": 10,
+            "statusMessage": "Synchronizuję kontekst firmowy..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-skill-requirements.js\"",
+            "timeout": 10,
+            "statusMessage": "Sprawdzam wymagania skilla..."
+          }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-skill-requirements.js\"",
+            "timeout": 10,
+            "statusMessage": "Sprawdzam wymagania skilla..."
+          }
+        ]
+      }
+    ]
+  }
+}

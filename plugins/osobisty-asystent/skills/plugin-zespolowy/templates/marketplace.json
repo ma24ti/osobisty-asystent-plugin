@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "{{PLUGIN}}",
+  "description": "{{OPIS}}",
+  "owner": {
+    "name": "{{WLASCICIEL}}",
+    "url": "https://github.com/{{ORG}}"
+  },
+  "plugins": [
+    {
+      "name": "{{PLUGIN}}",
+      "source": "./plugins/{{PLUGIN}}",
+      "description": "{{OPIS}}"
+    }
+  ]
+}
