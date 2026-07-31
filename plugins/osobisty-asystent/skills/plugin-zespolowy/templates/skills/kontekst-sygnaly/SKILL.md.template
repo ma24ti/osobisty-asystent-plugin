@@ -1,0 +1,190 @@
+---
+name: kontekst-sygnaly
+description: Zbiera sygnały do kontekstu firmowego z WŁASNYCH logów sesji — skan 7 dni po słowniku kategorii, propozycje z checkboxami, po zatwierdzeniu commit do zbiornika context/inbox/ w repo pluginu. Dwa tryby — scan (domyślny, cron piątek) i wyslij (po zaznaczeniu checkboxów). Użyj gdy user mówi "sygnały do kontekstu", "kontekst sygnały", "wyślij sygnały", "/kontekst-sygnaly", lub gdy uruchamia scheduler.
+allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob"]
+---
+
+# Kontekst-sygnały
+
+Wyłapuje z Twojej tygodniowej pracy fakty, które powinny trafić do wspólnego `company-context.md`,
+zanim zginą razem z sesją. Bliźniak `/reflect weekly` (ten sam wzorzec: logi → propozycje
+z checkboxami → human approval), ale z innym słownikiem: **fakty o firmie**, nie preferencje.
+
+Podział ról (nie wchodź w cudze):
+- `reflect` → persona / soul / voice-of-tone (preferencje i styl).
+- `memory-update` → NOW.md (bieżący stan projektów).
+- **kontekst-sygnaly → zbiornik `context/inbox/`** (fakty o firmie, do przeglądu przez admina).
+- `kontekst-firmowy` (admin) → nanosi zebrane sygnały na `company-context.md`.
+
+## Prywatność — nienegocjowalne
+
+1. Skan czyta **wyłącznie WŁASNE logi** na tej maszynie — nigdy cudze.
+2. **Nic nie wychodzi bez zatwierdzenia checkboxem** — wysyłka to osobny, świadomy krok.
+   Sam skan uruchamia właściciel logów (ręcznie albo własnym jobem w schedulerze) i wynik
+   zostaje u niego, dopóki nie zdecyduje inaczej.
+
+Do zbiornika NIGDY nie wpisuj sekretów (klucze, hasła, tokeny, dane osobowe spoza zespołu) —
+to repo widzi cały zespół.
+
+## 1. Wykryj tryb
+
+- `/kontekst-sygnaly wyslij` → tryb **wyslij**.
+- W przeciwnym razie (też z crona) → tryb **scan**.
+
+---
+
+## Tryb SCAN (domyślny, cron-friendly)
+
+### 2s. Setup (cross-platform — Windows-safe)
+> ⚠️ Na Windows `command -v python3` zwraca stub ze Sklepu Microsoft. Blok niżej go pomija.
+> Uruchamiaj z roota vaulta — **NIE rób `cd`**.
+> ```bash
+> PYTHON=""
+> for cand in python3 python; do
+>   p=$(command -v "$cand" 2>/dev/null) || continue
+>   case "$p" in *WindowsApps*) continue;; esac
+>   PYTHON="$p"; break
+> done
+> [ -z "$PYTHON" ] && PYTHON=python
+> export MEMORY_UPDATE_WORKSPACE="${CLAUDE_PROJECT_DIR:-$PWD}"
+> mkdir -p .claude/tmp
+> ```
+
+### 3s. Parsuj 7-dniowe logi
+```bash
+$PYTHON {baseDir}/scripts/parse_sessions.py --days 7 2>.claude/tmp/sygnaly-stats.txt > .claude/tmp/sygnaly-dialog.txt
+cat .claude/tmp/sygnaly-stats.txt
+```
+Jeśli 0 sesji → "Brak sesji z ostatniego tygodnia" i zakończ.
+
+### 4s. Wczytaj aktualny kontekst firmowy
+Przeczytaj `.claude/rules/company-context.md` (kopia lokalna, dystrybuowana hookiem).
+To filtr duplikatów: sygnał już obecny w kontekście NIE jest sygnałem.
+
+### 5s. Ekstrakcja — słownik kategorii (twardy filtr)
+
+Przeskanuj dialog. Szukaj WYŁĄCZNIE w tych kategoriach:
+
+| Kategoria | Przykład trafienia |
+|-----------|--------------------|
+| Cele i wyniki firmy | „przekroczyliśmy 500 klientów", nowy cel kwartalny |
+| Nowe projekty i produkty | „startujemy z acme-flow we wrześniu" |
+| Nazewnictwo | „produkt nazywa się acme-flow, nie »Acme Flow«" |
+| Zmiany w zespole i odpowiedzialnościach | „Ania przejmuje linię B2B" |
+| Powtarzające się blokery | ten sam bloker w ≥2 sesjach, istotny dla zespołu |
+| Decyzje unieważniające coś w kontekście | „nie sprzedajemy już X", zmiana kanału/platformy |
+
+Test rozstrzygający: **sygnał jest prawdą o firmie, nie o projekcie.**
+„Acme-flow startuje we wrześniu" — tak. „Kampania B ma ROAS 2,03" — nie (kontekst projektu → NOW.md).
+
+Dodatkowo odrzuć:
+- fakty już obecne w `company-context.md` (krok 4s),
+- preferencje i styl (→ reflect), stan projektów (→ memory-update),
+- wszystko z sekretem lub daną osobową w treści,
+- pojedyncze niejednoznaczne wzmianki — sygnał ma być cytowalny (padło wprost w rozmowie).
+
+### 6s. Zapisz propozycje do `.claude/rules/_kontekst-sygnaly-pending.md`
+
+Jeśli zero sygnałów — NIE twórz pliku, zakończ raportem jednym zdaniem.
+Jeśli plik pending JUŻ ISTNIEJE (poprzedni tydzień nieprzejrzany) — **NIE nadpisuj**:
+dopisz nowe sygnały jako kolejne sekcje `##` pod istniejącymi (bez duplikatów),
+zachowaj stan checkboxów zaznaczonych przez usera. Format:
+
+```markdown
+# Kontekst-sygnały — propozycje do wysłania
+
+*Wygenerowane: YYYY-MM-DD | Zakres: 7 dni | Sesje: N*
+
+> Zaznacz `- [x]` przy sygnałach wartych wysłania adminowi, potem odpal
+> `/{{PLUGIN}}:kontekst-sygnaly wyslij`. Niezaznaczone przepadają (świadomie).
+
+## Sygnał: [jedno zdanie — fakt o firmie]
+**Kategoria:** nazewnictwo · **Źródło:** sesja DD.MM (cytat lub parafraza)
+- [ ] ✅ Wyślij ten sygnał
+
+### Odrzucone w tym przebiegu (świadomie)
+- [opis + powód] — H3, nie liczy się jako propozycja
+```
+
+### 7s. Utwórz zadanie-przypomnienie
+Jeśli powstały propozycje — wywołaj skill `utworz-zadanie`:
+> tytuł: `📡 Przejrzyj N sygnałów do kontekstu firmowego`, termin: dziś, priorytet: normalny
+
+### 8s. Podsumuj
+Ile sygnałów, w jakich kategoriach, gdzie czekają, jak wysłać. Cleanup: `rm -f .claude/tmp/sygnaly-*.txt`.
+
+---
+
+## Tryb WYSLIJ (po zatwierdzeniu checkboxów)
+
+### 2w. Wczytaj pending
+Przeczytaj `.claude/rules/_kontekst-sygnaly-pending.md`. Brak pliku → "Brak propozycji —
+odpal najpierw `/{{PLUGIN}}:kontekst-sygnaly`." i zakończ. Zbierz sekcje `## Sygnał:` z `- [x]`.
+Zero zaznaczonych → poinformuj (zaznacz checkboxy albo skasuj plik, jeśli nic nie jest warte wysłania) i zakończ.
+
+### 3w. Ustal tożsamość i tydzień
+- Nick — odczytaj wprost z `.env` workspace'u (Bash NIE dostaje go w środowisku sam z siebie):
+  ```bash
+  ENV_FILE="${CLAUDE_PROJECT_DIR:-$PWD}/.env"
+  TEAM_USER=$(grep -E '^TEAM_USER=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)
+  ```
+  **Brak lub pusty → zapytaj usera o nick** (małymi literami, np. `ania`), dopisz
+  `TEAM_USER=<nick>` do `$ENV_FILE` sam — pytanie pada tylko przy pierwszej wysyłce.
+- Tydzień ISO: `date +%G-W%V` (np. `2026-W31`).
+
+### 4w. Zapisz do zbiornika w repo pluginu
+
+Repo: pole `plugin_repo` z `{baseDir}/../../team-config.json` (np. `acme-co/acme-team-plugin`).
+
+```bash
+TMP=$(mktemp -d) && gh repo clone "<plugin_repo>" "$TMP/plugin" -- --depth 1
+```
+Plik docelowy: `$TMP/plugin/plugins/{{PLUGIN}}/context/inbox/<TEAM_USER>-<rok>-W<nr>.md`.
+Jeśli istnieje (druga wysyłka w tygodniu) — DOPISZ pod istniejącą treścią, nie nadpisuj. Format:
+
+```markdown
+# Sygnały: <TEAM_USER> — <rok>-W<nr>
+
+## [jedno zdanie — fakt o firmie]
+**Kategoria:** … · **Źródło:** sesja DD.MM (cytat/parafraza) · **Wysłano:** YYYY-MM-DD
+```
+
+**Bramka sekretów (PRZED commitem):** przepuść plik przez grep wzorców kluczy
+(`sk-`, `AKIA`, `ghp_`, `github_pat_`, `xox`, `AIza`, `-----BEGIN`, `_KEY=`, `_TOKEN=`).
+Trafienie → STOP, pokaż linię, nie commituj — sekret w historii wspólnego repo
+oznacza rotację klucza dla całego zespołu.
+
+Commit i push — **sprzątanie DOPIERO po udanym pushu**:
+```bash
+git -C "$TMP/plugin" add plugins/{{PLUGIN}}/context/inbox/
+git -C "$TMP/plugin" commit -m "sygnały: <TEAM_USER> <rok>-W<nr>"
+git -C "$TMP/plugin" push \
+  || (git -C "$TMP/plugin" pull --rebase && git -C "$TMP/plugin" push)
+```
+(Odrzucony push = ktoś równolegle wypchnął COKOLWIEK, nawet inne pliki — rebase
+rozwiązuje to automatycznie, osobne pliki się nie gryzą.)
+- Push przeszedł (exit 0) → `rm -rf "$TMP"` i dalej do 5w.
+- Push dalej pada → **NICZEGO nie kasuj** (ani `$TMP`, ani pendingu): podaj userowi
+  ścieżkę klonu z gotowym commitem + komunikat błędu i zakończ.
+
+### 5w. Posprzątaj (dopiero po potwierdzonym pushu)
+- Skasuj `.claude/rules/_kontekst-sygnaly-pending.md` (niezaznaczone = świadomie odrzucone).
+- Domknij zadanie-przypomnienie z 7s (checkbox w `Zadania/Dashboard.md` + `status: zrobione` w pliku zadania).
+- Podsumuj: ile sygnałów poszło, do jakiego pliku. Admin zobaczy je przy poniedziałkowym review.
+
+---
+
+## Automatyzacja (scheduler)
+
+Job cykliczny per osoba — **piątek 10:00**, prompt: `/{{PLUGIN}}:kontekst-sygnaly`
+(sam scan; wysyłka zostaje świadomą decyzją człowieka). Częstotliwość tygodniowa —
+jeśli za gęsto, przestaw na co 2 tygodnie, skill jest na to odporny
+(skanuje zawsze ostatnie 7 dni od uruchomienia).
+
+## Zasady
+
+- Skan czyta WYŁĄCZNIE własne logi; wysyłka WYŁĄCZNIE zaznaczonych checkboxów.
+- Zero sekretów i danych osobowych w treści sygnałów.
+- Sygnał = fakt o firmie. Projekty → memory-update, preferencje → reflect.
+- NIE edytuj `company-context.md` — to robi wyłącznie admin przez `/{{PLUGIN}}:kontekst-firmowy`.
+- NIE edytuj cudzych plików w `context/inbox/`.

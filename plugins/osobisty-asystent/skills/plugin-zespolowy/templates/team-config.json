@@ -1,0 +1,4 @@
+{
+  "$comment": "Wspólna konfiguracja zespołu — NIE sekrety (te trzyma każdy u siebie w .env, patrz .env.example). Skille kontekstowe czytają stąd pole plugin_repo, żeby wiedzieć, do jakiego repo commitować sygnały i kontekst firmowy.",
+  "plugin_repo": "{{ORG}}/{{REPO}}"
+}

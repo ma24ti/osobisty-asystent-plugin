@@ -1,0 +1,140 @@
+---
+name: kontekst-firmowy
+description: Administracja wspólnym kontekstem firmowym (context/company-context.md w repo pluginu) — TYLKO dla administratora kontekstu. Tryb review — czyta zbiornik sygnałów od zespołu + własne logi, proponuje diff, po rozmowie commituje, podbija version i czyści zbiornik. Tryb status — ostatnia zmiana, ile linii z limitu 150, ile sygnałów czeka. Użyj gdy user mówi "review kontekstu", "zaktualizuj kontekst firmowy", "status kontekstu", "/kontekst-firmowy".
+allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob"]
+---
+
+# Kontekst-firmowy
+
+Narzędzie **administratora kontekstu** — jednej osoby odpowiedzialnej za `company-context.md`.
+Reszta zespołu NIE edytuje kontekstu: dostaje go read-only hookiem `SessionStart`
+(`sync-company-context.js`), a swoje uwagi wysyła przez `/{{PLUGIN}}:kontekst-sygnaly`.
+
+**Twardy limit: < 150 linii.** Plik ładuje się w każdej sesji każdej osoby — spuchnięty
+kosztuje wszystkich, codziennie. Domyślna operacja przy review to CIĘCIE, nie dopisywanie.
+
+## 0. Ustal repo
+
+Źródło prawdy: repo pluginu — pole `plugin_repo` w `{baseDir}/../../team-config.json`
+(np. `acme-co/acme-team-plugin`), plik `plugins/{{PLUGIN}}/context/company-context.md`.
+
+## 1. Wykryj tryb
+
+- `/kontekst-firmowy status` → tryb **status**.
+- W przeciwnym razie → tryb **review**.
+
+---
+
+## Tryb STATUS
+
+Bez klonowania — trzy pytania do API GitHuba, zero edycji:
+```bash
+gh api "repos/<plugin_repo>/commits?path=plugins/{{PLUGIN}}/context/company-context.md&per_page=1" \
+  --jq '.[0].commit.committer.date + " — " + .[0].commit.message'
+gh api -H "Accept: application/vnd.github.raw" \
+  "repos/<plugin_repo>/contents/plugins/{{PLUGIN}}/context/company-context.md" | wc -l
+gh api "repos/<plugin_repo>/contents/plugins/{{PLUGIN}}/context/inbox" --jq '.[].name' | grep -v README
+```
+Podaj: data i opis ostatniej zmiany · wersja z nagłówka (`<!-- version: … -->`) ·
+linie X/150 (⚠️ gdy > 130) · ile plików sygnałów czeka i od kogo.
+
+---
+
+## Tryb REVIEW
+
+Interaktywny — wymaga rozmowy z adminem. Z crona NIE odpalać (cron tworzy tylko
+zadanie-przypomnienie, patrz Automatyzacja).
+
+### 1r. Zlokalizuj klon
+
+Odczytaj `TEAM_PLUGIN_DIR` z `.env` workspace'u (Bash NIE dostaje go sam z siebie):
+```bash
+ENV_FILE="${CLAUDE_PROJECT_DIR:-$PWD}/.env"
+TEAM_PLUGIN_DIR=$(grep -E '^TEAM_PLUGIN_DIR=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)
+```
+- Ustawiony → `REPO="$TEAM_PLUGIN_DIR"`, na start `git -C "$REPO" pull`
+  (inaczej nadpiszesz cudze sygnały starym stanem).
+- Pusty → świeży klon tymczasowy:
+  ```bash
+  TMP=$(mktemp -d) && gh repo clone "<plugin_repo>" "$TMP/plugin" -- --depth 1
+  ```
+  `REPO="$TMP/plugin"`; sprzątnij `rm -rf "$TMP"` DOPIERO po udanym pushu w 6r.
+
+Dalej `CTX` = `$REPO/plugins/{{PLUGIN}}/context/company-context.md`.
+
+### 2r. Zbierz wejście (trzy źródła)
+
+1. **Aktualny kontekst:** przeczytaj `$CTX` w całości.
+2. **Zbiornik sygnałów:** wszystkie `$REPO/plugins/{{PLUGIN}}/context/inbox/*.md` poza README.
+3. **Własne logi admina (7 dni)** — ten sam parser i słownik co w `kontekst-sygnaly`:
+   ```bash
+   PYTHON=""
+   for cand in python3 python; do
+     p=$(command -v "$cand" 2>/dev/null) || continue
+     case "$p" in *WindowsApps*) continue;; esac
+     PYTHON="$p"; break
+   done
+   [ -z "$PYTHON" ] && PYTHON=python
+   export MEMORY_UPDATE_WORKSPACE="${CLAUDE_PROJECT_DIR:-$PWD}"
+   mkdir -p .claude/tmp
+   $PYTHON {baseDir}/scripts/parse_sessions.py --days 7 2>.claude/tmp/ctx-stats.txt > .claude/tmp/ctx-dialog.txt
+   ```
+   Filtr jak w kontekst-sygnaly: kategorie (cele/wyniki · projekty/produkty · nazewnictwo ·
+   zespół/odpowiedzialności · powtarzające się blokery · decyzje unieważniające) + test
+   „prawda o firmie, nie o projekcie".
+
+### 3r. Dedupe i ranking
+
+- Scal sygnały mówiące o tym samym. **Ten sam sygnał od ≥2 osób = mocny — na górę listy.**
+- Odrzuć to, co już jest w kontekście albo co go nie zmienia.
+- Dla każdego kandydata przygotuj konkretny diff na `$CTX` (ADD / UPDATE / DELETE —
+  pamiętaj o limicie: dopisujesz linię, wskaż co wyleci, jeśli plik zbliża się do 150).
+
+### 4r. Rozmowa z adminem
+
+Pokaż zwięzłą listę: „N kandydatów, bierzemy które?" — każdy z diffem, źródłem
+(kto zgłosił / własne logi) i liczbą osób. Admin wybiera. Zero zmian bez zgody.
+Brak kandydatów → powiedz to wprost i przejdź do 6r (czyszczenie zbiornika, jeśli coś czeka).
+
+### 5r. Nanieś i wersjonuj
+
+- Edytuj `$CTX` — TYLKO zatwierdzone pozycje, idiom pliku bez zmian.
+- Podbij `<!-- version: YYYY-MM-DD -->` na dzisiejszą datę.
+- Sprawdź `wc -l` — **> 150 = nie commituj**, zaproponuj cięcia i dopiero po nich commit.
+
+### 6r. Wyczyść zbiornik i wypchnij
+
+```bash
+git -C "$REPO" rm plugins/{{PLUGIN}}/context/inbox/<przetworzone>.md
+git -C "$REPO" add plugins/{{PLUGIN}}/context/company-context.md
+git -C "$REPO" commit -m "kontekst: <jedno zdanie co się zmieniło> (vYYYY-MM-DD)"
+git -C "$REPO" push || (git -C "$REPO" pull --rebase && git -C "$REPO" push)
+```
+Kasuj WYŁĄCZNIE pliki sygnałów przetworzone w tym review (także te odrzucone w rozmowie —
+decyzja zapadła). Push przeszedł → dopiero teraz sprzątnij klon tymczasowy z 1r.
+Push dalej pada → NIC nie kasuj, podaj ścieżkę klonu i błąd.
+
+### 7r. Podsumuj
+
+Co weszło / co odrzucone i czemu / ile linii ma plik / przypomnienie: zespół dostanie
+nową wersję automatycznie przy najbliższym starcie sesji (hook), nic nie trzeba rozsyłać.
+
+---
+
+## Automatyzacja (scheduler)
+
+Job u admina — **poniedziałek 9:00**, headless. Review jest interaktywny, więc cron
+NIE robi review — sprawdza zbiornik i tworzy zadanie:
+
+> Sprawdź `gh api repos/<plugin_repo>/contents/plugins/{{PLUGIN}}/context/inbox` — jeśli są
+> pliki `.md` poza README, wywołaj skill `utworz-zadanie`: tytuł
+> `🏢 Review kontekstu firmowego — N sygnałów czeka (/{{PLUGIN}}:kontekst-firmowy review)`,
+> termin: dziś, priorytet: ważny. Zero plików → nic nie rób.
+
+## Zasady
+
+- Edytuje wyłącznie admin, wyłącznie przez ten skill — źródło w repo, nigdy lokalna kopia w `rules/`.
+- Human approval na każdy diff. Limit 150 linii jest twardy.
+- Zbiornik po review jest PUSTY — sygnał przetworzony znika, historia zostaje w gicie.
+- Sekrety nie mają wstępu do kontekstu (czyta go każda sesja każdej osoby).
+- Wiedza projektowa → NOW.md właściciela projektu, nie tu.
