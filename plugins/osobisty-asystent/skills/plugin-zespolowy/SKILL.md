@@ -82,6 +82,7 @@ im właściwą nazwę).
 | `skills/kontekst-sygnaly/scripts/parse_sessions.py` | `<repo>/plugins/<plugin>/skills/kontekst-sygnaly/scripts/parse_sessions.py` |
 | `skills/kontekst-firmowy/SKILL.md.template` | `<repo>/plugins/<plugin>/skills/kontekst-firmowy/SKILL.md` |
 | `skills/kontekst-firmowy/scripts/parse_sessions.py` | `<repo>/plugins/<plugin>/skills/kontekst-firmowy/scripts/parse_sessions.py` |
+| `scripts/update-marketplaces.js` | `<repo>/scripts/update-marketplaces.js` |
 
 Pozostałe skille dojdą przez `/plugin-zespolowy add`.
 
