@@ -72,6 +72,15 @@ VPS_RUN_AS=claude
 
 Wymaga działającego dostępu SSH do VPS oraz Claude Code w wersji ≥ 2.1.51 na serwerze (Remote Control). Komendy: `new <nazwa>` (nowa sesja), `list` (żywe sesje), `kill <nazwa>`, `attach <nazwa>`.
 
+## Moduł C — plugin zespołowy (Team OS)
+
+- `/plugin-zespolowy` — buduje i utrzymuje wspólny plugin Waszego zespołu:
+  - `init` — stawia repo pluginu od zera: manifesty, README z instrukcją instalacji dla zespołu, strażnik sekretów (skill bez klucza nie wystartuje) oraz mechanikę **kontekstu firmowego**: skille `kontekst-sygnaly` i `kontekst-firmowy` plus hook, który rozdaje `company-context.md` wszystkim przy starcie sesji.
+  - `add <skill>` — przenosi skill z Twojego `.claude/skills/` do pluginu, z audytem przed kopiowaniem: wklejone klucze i sztywne ścieżki nie przejdą.
+  - `check` — raport driftu: co masz lokalnie, a czego nie ma w pluginie (i odwrotnie).
+
+Wymaga zalogowanego GitHub CLI (`gh auth login` + `gh auth setup-git`). Reszta instrukcji — w README, które `init` generuje dla Twojego zespołu.
+
 ---
 
 Akademia Automatyzacji — https://akademiaautomatyzacji.com
