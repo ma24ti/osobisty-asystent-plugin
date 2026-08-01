@@ -28,7 +28,7 @@ const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || path.join(__dirname, '..');
 const source = path.join(pluginRoot, 'context', 'company-context.md');
 const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 const rulesDir = path.join(projectDir, '.claude', 'rules');
-const target = path.join(rulesDir, 'company-context.md');
+const target = path.join(rulesDir, '{{PLUGIN}}-company-context.md');
 
 function readVersion(text) {
   const m = text && text.match(/<!--\s*version:\s*(\S+)\s*-->/);

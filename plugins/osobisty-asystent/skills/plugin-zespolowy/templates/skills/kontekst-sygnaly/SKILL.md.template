@@ -58,7 +58,7 @@ cat .claude/tmp/sygnaly-stats.txt
 Jeśli 0 sesji → "Brak sesji z ostatniego tygodnia" i zakończ.
 
 ### 4s. Wczytaj aktualny kontekst firmowy
-Przeczytaj `.claude/rules/company-context.md` (kopia lokalna, dystrybuowana hookiem).
+Przeczytaj `.claude/rules/{{PLUGIN}}-company-context.md` (kopia lokalna, dystrybuowana hookiem).
 To filtr duplikatów: sygnał już obecny w kontekście NIE jest sygnałem.
 
 ### 5s. Ekstrakcja — słownik kategorii (twardy filtr)
@@ -78,7 +78,7 @@ Test rozstrzygający: **sygnał jest prawdą o firmie, nie o projekcie.**
 „Acme-flow startuje we wrześniu" — tak. „Kampania B ma ROAS 2,03" — nie (kontekst projektu → NOW.md).
 
 Dodatkowo odrzuć:
-- fakty już obecne w `company-context.md` (krok 4s),
+- fakty już obecne w `{{PLUGIN}}-company-context.md` (krok 4s),
 - preferencje i styl (→ reflect), stan projektów (→ memory-update),
 - wszystko z sekretem lub daną osobową w treści,
 - pojedyncze niejednoznaczne wzmianki — sygnał ma być cytowalny (padło wprost w rozmowie).

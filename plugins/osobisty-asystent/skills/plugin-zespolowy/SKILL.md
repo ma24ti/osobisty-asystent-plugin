@@ -103,9 +103,11 @@ Po podmianie sprawdź, że nigdzie nie został `{{`:
 ```bash
 grep -rn '{{' "$DIR" && echo "⚠️ zostały niepodmienione placeholdery" || echo "OK"
 ```
-Uwaga na dwa miejsca, w których placeholder siedzi w kodzie, nie w tekście:
+Uwaga na trzy miejsca, w których placeholder siedzi w kodzie, nie w tekście:
 `check-skill-requirements.js` (porównanie prefiksu `{{PLUGIN}}:` — hook pilnuje wyłącznie
-skilli własnego pluginu) i `scripts/update-marketplaces.js` (lista `MARKETPLACES`).
+skilli własnego pluginu), `scripts/update-marketplaces.js` (lista `MARKETPLACES`)
+i `hooks/sync-company-context.js` (nazwa pliku docelowego `{{PLUGIN}}-company-context.md`
+w `rules/` — prefiks chroni przed kolizją, gdy ktoś ma dwa pluginy zespołowe).
 
 ### 4i. Repo + pierwszy push
 ```bash
