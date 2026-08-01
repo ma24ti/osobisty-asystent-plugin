@@ -68,15 +68,17 @@ Dla repo prywatnych auto-update jest domyślnie WYŁĄCZONY. Ręcznie w każdej 
 `/plugin` → Update marketplace, potem `/reload-plugins`.
 
 Auto-update w tle i tak potrafi nie dociągnąć prywatnego repo przez HTTPS (w tle
-wyłącza credential helpery gita). Pewny sposób: dzienny job w schedulerze uruchamiający
-`scripts/update-marketplaces.js` z tego repo — to zwykły `git pull`, który korzysta
-z helpera `gh` i po prostu działa.
+wyłącza credential helpery gita). Do tego sesja ładuje plugin ze snapshotu przypiętego
+do wersji z dnia instalacji — samo odświeżenie klonu nie wystarcza. Pewny sposób:
+dzienny job w schedulerze uruchamiający `scripts/update-marketplaces.js` z tego repo —
+używa CLI Claude Code (`claude plugin marketplace update` + `claude plugin update`),
+które przepina snapshot każdej instalacji.
 
 ## Kontekst firmowy i pętla sygnałów
 
 W repo żyje `plugins/{{PLUGIN}}/context/company-context.md` — jeden plik z wiedzą o firmie,
 który ma znać każda sesja każdej osoby. Hook `SessionStart` kopiuje go do
-`.claude/rules/company-context.md` w vaultach asystenta (projekty kodowe pomija).
+`.claude/rules/{{PLUGIN}}-company-context.md` w vaultach asystenta (projekty kodowe pomija).
 Nikt nie edytuje swojej kopii — nadpisze się przy następnym starcie.
 
 Dwa skille domykają pętlę:
