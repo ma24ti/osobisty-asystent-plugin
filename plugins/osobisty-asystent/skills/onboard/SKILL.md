@@ -1,16 +1,30 @@
 ---
-name: onboarding
-description: Jednorazowy wizard setup Osobistego Asystenta AI — wywiad, generacja persona.md, soul.md, opcjonalnie biznes.md i content/voice-of-tone.md, zawsze content/ai-writing-patterns.md, struktura folderów, CLAUDE.md
+name: onboard
+description: Jednorazowy wizard setup Osobistego Asystenta AI — wywiad, generacja persona.md, soul.md, opcjonalnie biznes.md i content/voice-of-tone.md, zawsze content/ai-writing-patterns.md, struktura folderów, CLAUDE.md. Tryb --refresh-theme odświeża same snippety CSS (motyw Skrzynki i systemu zadań) na już skonfigurowanym systemie
 disable-model-invocation: true
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Bash", "AskUserQuestion"]
 ---
 
-# Onboarding — Setup Osobistego Asystenta AI
+# Onboard — Setup Osobistego Asystenta AI
 
 Jednorazowy wizard, który prowadzi usera przez konfigurację Personal OS. Wywiad → generacja plików kontekstowych → struktura folderów → CLAUDE.md.
 
 **Czas:** ~15-20 minut
 **Wynik:** persona.md, soul.md, opcjonalnie biznes.md, CLAUDE.md, struktura folderów
+
+---
+
+## TRYBY WYWOŁANIA
+
+Sprawdź argumenty **zanim** wejdziesz w KROK 0 — tryb `--refresh-theme` celowo omija gateway
+(uruchamia się na systemie JUŻ skonfigurowanym, bo tam właśnie motyw się rozjeżdża).
+
+| Wywołanie | Co robi |
+|-----------|---------|
+| `/onboard` (bez argumentów) | Pełny wizard — kroki 0 → 14 |
+| `/onboard --refresh-theme` | **Tylko** odświeżenie motywu (snippety CSS). Zero pytań, zero generacji plików kontekstowych — patrz „TRYB: --refresh-theme" na dole tego pliku |
+
+Nieznany argument → powiedz userowi, jakie tryby istnieją, i **nie** startuj wizardu.
 
 ### Wspólny pattern: generacja → review → zapis
 
@@ -324,9 +338,27 @@ Zadania/
     └── szablon-zadania.md  ← skopiuj z templates/szablon-zadania.md
 
 Zasoby/
+
+.obsidian/snippets/
+├── dashboard-todo.css    ← skopiuj z templates/dashboard-todo.css
+└── skrzynka.css          ← skopiuj z templates/skrzynka.css
 ```
 
 Pliki template'ów: przeczytaj z folderu `templates/` w tym skillu i skopiuj do docelowych lokalizacji.
+
+**Snippety CSS (wygląd systemu zadań i Skrzynki Team OS):** po skopiowaniu obu plików do `.obsidian/snippets/`
+dopisz `"dashboard-todo"` i `"skrzynka"` do listy `enabledCssSnippets` w `.obsidian/appearance.json`
+(utwórz plik z `{"enabledCssSnippets": ["dashboard-todo", "skrzynka"]}`, jeśli nie istnieje).
+Jeśli plik już istnieje — **dopisz brakujące wpisy do istniejącej listy**, nie podmieniaj jej
+(user ma tam własne snippety). Jeśli Obsidian jest otwarty, użytkownik może musieć odświeżyć
+listę: Ustawienia → Wygląd → Fragmenty CSS → ikona odświeżania.
+
+**⚠️ Wymagana wersja Obsidiana — sprawdź i powiedz userowi wprost.**
+Snippet `skrzynka.css` stoi na selektorze CSS `:has()`, który działa dopiero na silniku
+Chromium 105+. Na starszym Obsidianie karty Skrzynki renderują się jako surowe callouty —
+awatary na tekście, brak kart, checkbox przyklejony. To nie jest błąd snippetu i **nie
+naprawia się go przepisywaniem CSS** — lekarstwem jest aktualizacja Obsidiana
+(Ustawienia → Ogólne → Sprawdź aktualizacje; na Obsidianie ≥ 1.4 problem nie występuje).
 
 **AskUserQuestion — 1 pytanie, multiSelect:**
 
@@ -504,3 +536,70 @@ Pomiń linijkę z biznes.md jeśli nie został utworzony.
 - **Templates z tego skilla** — pliki do Zadania/ kopiuj z `templates/` w tym skillu, NIE twórz od zera
 - **Foldery** — twórz wszystkie potrzebne foldery automatycznie (mkdir -p)
 - **Język** — pisz w języku w jakim mówi user (jeśli po polsku → wszystko po polsku)
+
+---
+
+## Skrzynka Team OS — flow
+
+Kontekst dla usera i dla Ciebie, gdy ktoś pyta „skąd się bierze Skrzynka" albo „czemu moje
+odhaczenie zniknęło". Sama Skrzynka **nie jest** produktem tego skilla — generuje ją Puls
+(claude-cron). Onboard dostarcza tylko **motyw** (snippety CSS).
+
+**Co się dzieje co minutę** — script-job Pulsa „Team OS — inbox sync" robi `push` → `pull`
+w jednym procesie (kolejność jest istotna: najpierw wysyła Twoje odhaczenia, dopiero potem
+przerysowuje plik):
+
+| Krok | Co robi | Czego dotyka |
+|------|---------|--------------|
+| `push` | Czyta **odhaczone** checkboxy z sekcji „Otrzymane". `- [x] Zrobione` (zadanie) → zgłasza wykonanie do huba, nadawca dostaje potwierdzenie. `- [x] Zapoznane` (pytanie/odpowiedź) → domyka wątek bez odpowiedzi. Zamkniętą nitkę dopisuje do archiwum | `Zadania/Skrzynka.md` (odczyt), `Zasoby/inbox-archive/YYYY-MM.md` (zapis, jeden blok na wątek — ponowne domknięcie **podmienia** blok, nie dokłada duplikatu) |
+| `pull` | Pobiera aktywne wątki z huba i **przepisuje w całości** bloki między markerami: `%% inbox:items:start/end %%` (Otrzymane) i `%% delegated:items:start/end %%` (Wysłane). Każdy wątek = jedna zwijana karta z nitką wiadomości i JEDNYM checkboxem. Brakujące klucze frontmattera (w tym `cssclasses: [skrzynka]`) domergowuje przy każdym przebiegu — wartości już obecne zostawia nietknięte. Zapisuje **tylko przy realnej zmianie treści** | `Zadania/Skrzynka.md` (blok między markerami + frontmatter) |
+
+**Co robi user:** odhacza checkbox w karcie. Tyle. Odpowiadanie i delegowanie idzie przez
+skill `/deleguj`.
+
+**Czego user NIE powinien ruszać:** markerów `%% … %%` (bez nich job nie wie, gdzie pisać —
+i przestaje aktualizować sekcję), linii `%% id:… thread:… %%` pod checkboxem (identyfikuje
+wiadomość) ani treści między markerami — jest regenerowana i ręczne zmiany znikną przy
+najbliższym przebiegu. Reszta pliku (własne notatki poza blokami) jest bezpieczna.
+
+**Motyw i renderer to para.** Snippet `skrzynka.css` stylizuje dokładnie te klasy, które emituje
+renderer Pulsa; rozjazd wersji psuje wygląd na maszynie, która ma starszy plik. Puls pilnuje tego
+sam — job „Puls — kontrola spójności" porównuje snippet w vaultcie z szablonem w tym skillu
+i przy różnicy wystawia zadanie z komendą naprawczą `/onboard --refresh-theme`.
+
+---
+
+## TRYB: `--refresh-theme`
+
+Wywołanie: `/onboard --refresh-theme`. Odświeża **wyłącznie motyw**. Uruchamiaj bez pytań
+wstępnych i **bez** gateway checku z KROKU 0 — ten tryb z definicji działa na systemie już
+skonfigurowanym.
+
+**Kroki:**
+
+1. Skopiuj z `templates/` do `.obsidian/snippets/`, **nadpisując**:
+   - `dashboard-todo.css`
+   - `skrzynka.css`
+2. Upewnij się, że `.obsidian/appearance.json` ma `"dashboard-todo"` i `"skrzynka"` w liście
+   `enabledCssSnippets` — **dopisz brakujące**, nie podmieniaj listy (user ma tam własne snippety).
+   Brak pliku → utwórz z `{"enabledCssSnippets": ["dashboard-todo", "skrzynka"]}`.
+3. Jeśli `Zadania/Skrzynka.md` istnieje i **nie ma** klucza `cssclasses` we frontmatterze —
+   dopisz `cssclasses: [skrzynka]`. Klucz już obecny zostaw **nietknięty**, nawet gdy ma inną
+   wartość (user mógł dołożyć własne klasy). Bez pliku → pomiń; Puls dopisze klucz sam przy
+   najbliższym syncu.
+4. Powiedz userowi, żeby przeładował snippety: Ustawienia → Wygląd → Fragmenty CSS → ikona
+   odświeżania. Jeśli karty dalej wyglądają surowo — to wersja Obsidiana (patrz KROK 10,
+   wymaganie `:has()` / Chromium 105+), nie snippet.
+5. Wypisz ślad: które pliki nadpisałeś, co dopisałeś do `appearance.json`, czy `cssclasses`
+   było już na miejscu.
+
+**Czego ten tryb NIE dotyka** (mów to userowi, gdy pyta, czy jest bezpieczny):
+
+- treści `Zadania/Skrzynka.md` — wiadomości, odhaczone checkboxy i markery zostają,
+- archiwum `Zasoby/inbox-archive/`, zadań ani żadnego pliku w `Zadania/`
+  poza ewentualnym jednym kluczem frontmattera z punktu 3,
+- plików kontekstowych (`persona.md`, `soul.md`, `CLAUDE.md`, `voice-of-tone.md`),
+- flagi `.claude/.onboarded` — tryb jej nie tworzy i nie kasuje.
+
+**Świadomy koszt:** punkt 1 **nadpisuje** snippety, więc ręczne przeróbki CSS w vaultcie
+przepadają. Jeśli user takie ma — powiedz o tym **przed** kopiowaniem i pozwól mu zrobić kopię.

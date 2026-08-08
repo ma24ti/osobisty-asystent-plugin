@@ -1,0 +1,416 @@
+/* ═══════════════════════════════════════════════════════════════
+   Skrzynka.md — Team OS (redesign 07.2026, ciepły grafit)
+   Aktywny tylko na stronach z `cssclasses: skrzynka` (frontmatter domergowuje
+   sam renderer przy każdym pullu — snippet bez tej klasy nic nie stylowałby).
+   Markdown + inline spany (os-*) generuje inbox-pull (Puls);
+   wzorzec: mockup-skrzynka.html (projekt personal-team-os).
+   Paleta 1:1 z dashboard-todo.css.
+
+   ⚠️ Wymaga Obsidiana z Chromium 105+ (selektor `:has()` — 13 użyć niżej).
+   Na starym Obsidianie karty wyglądają jak surowe callouty; lekarstwem jest
+   AKTUALIZACJA OBSIDIANA, nie przepisywanie tego pliku (decyzja 05.08.2026).
+
+   Ten plik i renderer `scripts/inbox/inbox-pull.mjs` (repo claude-cron) są
+   PARĄ — rozjazd psuje wygląd u wszystkich naraz. Zsynchronizowany
+   05.08.2026 z rendererem po Fazach 1–4 „naprawy Team OS".
+   Job „Puls — kontrola spójności" porównuje ten szablon ze snippetem
+   w vaultcie i zgłasza rozjazd jako zadanie; naprawa = `/onboard --refresh-theme`.
+   ═══════════════════════════════════════════════════════════════ */
+
+.skrzynka {
+  --sk-bg: #2a2724;
+  --sk-card: #35322d;
+  --sk-line: #47433c;
+  --sk-ink: #f0eadd;
+  --sk-sub: #b3aa99;
+  --sk-mute: #7e776b;
+  --sk-coral: #ff8a70;
+  --sk-honey: #f0b350;
+  --sk-honey-line: #66573a;
+  --sk-sage: #6cc795;
+  --sk-sage-soft: #333a34;
+  --sk-sky: #7db4ea;
+  --sk-lav: #b3a5f5;
+  --sk-lav-line: #56506e;
+  --sk-pill: #423e37;
+}
+
+/* ── Tło — grafit z ciepłym glow, spójne z dashboardem ── */
+.markdown-preview-view.skrzynka,
+.markdown-source-view.skrzynka .cm-scroller {
+  background: var(--sk-bg);
+  background-image:
+    radial-gradient(at 18% -4%, rgba(240, 179, 80, 0.05) 0, transparent 45%),
+    radial-gradient(at 100% 110%, rgba(255, 138, 112, 0.04) 0, transparent 40%);
+  color: var(--sk-ink);
+}
+.skrzynka .markdown-preview-sizer { max-width: 780px; }
+.markdown-preview-view.skrzynka a.internal-link,
+.markdown-preview-view.skrzynka a {
+  color: var(--sk-sky);
+  font-weight: 600;
+  text-decoration: none;
+}
+.markdown-preview-view.skrzynka .metadata-container { display: none; }
+
+/* Obsidian dokłada inline title z nazwy pliku nad H1 „📬 Skrzynka" — chowamy duplikat */
+.skrzynka .inline-title { display: none; }
+
+.markdown-preview-view.skrzynka h1 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--sk-ink);
+  border-bottom: none;
+  margin-bottom: 6px;
+}
+
+/* ── Sekcje: 📥 coral, 📤 honey; licznik pod nagłówkiem jako pill ── */
+.skrzynka .el-h2 h2 {
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  border: none;
+  margin: 26px 0 8px;
+}
+.skrzynka .el-h2:has(h2[data-heading^="📥"]) h2 { color: var(--sk-coral); }
+.skrzynka .el-h2:has(h2[data-heading^="📤"]) h2 { color: var(--sk-honey); }
+.skrzynka .el-p em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--sk-pill);
+  color: var(--sk-sub);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══ KARTY WĄTKÓW — callouty todo/question/tip/note ═══ */
+.skrzynka .callout[data-callout="todo"],
+.skrzynka .callout[data-callout="question"],
+.skrzynka .callout[data-callout="tip"],
+.skrzynka .callout[data-callout="note"] {
+  background: var(--sk-card);
+  border: 1px solid var(--sk-line);
+  border-radius: 16px;
+  padding: 13px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  mix-blend-mode: normal;
+  --callout-color: 179, 170, 153;
+}
+.skrzynka .callout[data-callout-metadata="fresh"] {
+  border-left: 4px solid var(--sk-coral);
+}
+
+/* Zero pustki po markerach: renderer kończy KAŻDĄ kartę linią komentarza
+   (`%% id:… thread:… %%` w wątkach, `%% thread:… %%` w delegacjach) i dokłada
+   separator `<!--os-thread-sep-->` między nitką a checkboxem — Obsidian robi
+   z każdej takiej linii pusty akapit z marginesem. */
+.skrzynka .callout .callout-content p:empty { display: none; }
+
+/* tytuł wątku = tytuł calloutu; bez ikony, AnuPpuccin bez tła */
+.skrzynka .callout .callout-icon { display: none; }
+/* AnuPpuccin (styl sleek) rysuje dashed border nad treścią KAŻDEGO calloutu — precz */
+.skrzynka .callout .callout-content { border-top: none !important; }
+.skrzynka .callout .callout-title,
+.skrzynka .callout[data-callout] .callout-title {
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0;
+}
+.skrzynka .callout .callout-title-inner {
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--sk-ink);
+}
+
+/* linia pilli: tagi + meta w jednym rzędzie */
+.skrzynka .callout .callout-content > p:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 4px 0 2px;
+}
+.skrzynka .os-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--sk-pill);
+  border: 1px solid var(--sk-line);
+  color: var(--sk-sub);
+}
+.skrzynka .os-tag.t-task { color: var(--sk-sky); }
+.skrzynka .os-tag.t-query { color: var(--sk-honey); }
+.skrzynka .os-tag.t-reply { color: var(--sk-sage); }
+/* `close` renderer wciąż emituje (TYPE_EMOJI/TYPE_LABEL) — wątek domknięty, stąd wyciszenie */
+.skrzynka .os-tag.t-close { color: var(--sk-mute); }
+.skrzynka .os-tag.t-new { background: var(--sk-coral); border-color: var(--sk-coral); color: #2a2724; letter-spacing: 0.02em; }
+.skrzynka .os-meta {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--sk-mute);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Nitka — lista wiadomości z awatarami i szyną ── */
+/* AnuPpuccin rysuje własne bullety (::marker + .list-bullet) — na Skrzynce precz */
+.skrzynka .callout .callout-content li::marker { content: none !important; }
+.skrzynka .callout .callout-content .list-bullet { display: none !important; }
+/* scope TYLKO na callouty wątków — delegated ma własny layout */
+.skrzynka .callout:is([data-callout="todo"], [data-callout="question"], [data-callout="tip"], [data-callout="note"]) .callout-content ul:not(:has(.task-list-item)) {
+  list-style: none !important;
+  margin: 6px 0 2px;
+  padding-left: 4px !important;
+  margin-inline-start: 0 !important;
+  position: relative;
+}
+.skrzynka .callout:is([data-callout="todo"], [data-callout="question"], [data-callout="tip"], [data-callout="note"]) .callout-content ul:not(:has(.task-list-item))::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  background: color-mix(in srgb, var(--sk-line) 80%, var(--sk-sub));
+  border-radius: 2px;
+}
+.skrzynka .callout .callout-content ul:not(:has(.task-list-item)):has(li:only-child)::before { display: none; }
+/* awatar absolute + wcięcie — treść płynie normalnie (grid robił z każdego spanu osobny item) */
+.skrzynka .callout:is([data-callout="todo"], [data-callout="question"], [data-callout="tip"], [data-callout="note"]) .callout-content ul:not(:has(.task-list-item)) > li {
+  position: relative;
+  padding: 7px 0 7px 38px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--sk-ink);
+}
+.skrzynka .callout:is([data-callout="todo"], [data-callout="question"], [data-callout="tip"], [data-callout="note"]) .callout-content ul:not(:has(.task-list-item)) > li:last-child::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 40px;
+  bottom: -4px;
+  width: 8px;
+  background: var(--sk-card);
+}
+
+.skrzynka .os-av {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  /* Domyślnie JASNY inicjał na ciemnym pillu — renderer emituje `u-<slug>` dla KAŻDEGO
+     nadawcy, także spoza listy niżej (nowy członek zespołu, kursant). Ciemny kolor w bazie
+     robił z takiego awatara ciemne na ciemnym, czyli pustą kropkę. Kolor osoby = jasne tło,
+     więc te reguły przestawiają inicjał z powrotem na grafit. */
+  color: var(--sk-ink);
+  background: var(--sk-pill);
+  box-shadow: 0 0 0 4px var(--sk-card);
+}
+.skrzynka .os-av.u-kacper { background: var(--sk-sky); color: #2a2724; }
+.skrzynka .os-av.u-marcin { background: var(--sk-honey); color: #2a2724; }
+.skrzynka .os-av.u-filip { background: var(--sk-sage); color: #2a2724; }
+.skrzynka .os-av.u-mateusz { background: var(--sk-coral); color: #2a2724; }
+.skrzynka .os-av.u-bot {
+  background: color-mix(in srgb, var(--sk-lav) 14%, var(--sk-card));
+  border: 2px solid var(--sk-lav);
+  font-size: 13px;
+}
+/* wariant mały (`os-av s`) — renderer wspiera go w avatarSpan; stare archiwa go zawierają */
+.skrzynka .os-av.s {
+  position: static;
+  width: 21px;
+  height: 21px;
+  font-size: 10px;
+  box-shadow: none;
+  flex: none;
+}
+
+.skrzynka .os-who { font-size: 12.5px; font-weight: 700; color: var(--sk-ink); }
+.skrzynka .os-time { font-size: 12.5px; color: var(--sk-mute); font-variant-numeric: tabular-nums; }
+
+/* wiadomość agenta — lawendowy bąbel, badge AUTO, pill źródła */
+.skrzynka .callout .callout-content li:has(.os-av.u-bot) {
+  background: color-mix(in srgb, var(--sk-lav) 8%, var(--sk-card));
+  border: 1px solid var(--sk-lav-line);
+  border-left: 3px solid var(--sk-lav);
+  border-radius: 4px 12px 12px 12px;
+  padding: 8px 10px 8px 42px !important;
+  margin: 4px 0;
+}
+.skrzynka .callout .callout-content li:has(.os-av.u-bot) .os-av { left: 8px; box-shadow: none; }
+.skrzynka .callout .callout-content li:has(.os-av.u-bot) .os-who { color: var(--sk-lav); }
+.skrzynka .os-auto {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--sk-lav);
+  border: 1px solid var(--sk-lav-line);
+  border-radius: 999px;
+  padding: 0 8px;
+  margin-left: 4px;
+  letter-spacing: 0.03em;
+}
+.skrzynka .os-src {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--sk-sub);
+  background: var(--sk-pill);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.skrzynka .os-src code { background: transparent; padding: 0; font-size: 11px; color: var(--sk-sub); }
+
+/* ── Stopka — checkbox jako akcja ── */
+.skrzynka .callout .callout-content ul:has(.task-list-item) {
+  list-style: none !important;
+  margin: 10px 0 0;
+  padding: 10px 0 0 4px !important;
+  margin-inline-start: 0 !important;
+  border-top: 1px dashed var(--sk-line);
+}
+.skrzynka .callout .callout-content li.task-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--sk-sage);
+}
+/* AnuPpuccin przekreśla i koloruje taski po swojemu — twardy reset na Skrzynce */
+.skrzynka .callout .callout-content li.task-list-item,
+.skrzynka .callout .callout-content li.task-list-item * {
+  text-decoration: none !important;
+}
+.skrzynka .callout .task-list-item-checkbox {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  /* flex-box centruje ptaszka w obu osiach — line-height sam tego nie robi (glif siadał wyżej) */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: none !important;
+  width: 17px !important;
+  height: 17px !important;
+  border: 2px solid var(--sk-sage) !important;
+  border-radius: 6px !important;
+  background: var(--sk-sage-soft) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  position: static !important;
+  filter: none !important;
+}
+.skrzynka .callout .task-list-item-checkbox:not(:checked)::before,
+.skrzynka .callout .task-list-item-checkbox:not(:checked)::after {
+  display: none !important;
+  content: none !important;
+}
+.skrzynka .callout .task-list-item-checkbox:checked {
+  background: var(--sk-sage) !important;
+  border-color: var(--sk-sage) !important;
+}
+.skrzynka .callout .task-list-item-checkbox:checked::after {
+  content: "✓" !important;
+  display: block !important;
+  color: #2a2724;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  -webkit-mask: none !important;
+  mask: none !important;
+  background: none !important;
+  /* Reset pozycjonowania MUSI objąć pseudo-element, nie tylko samo pole: motyw
+     (AnuPpuccin) pozycjonuje ptaszka absolutnie i przesuwa go transformem, więc
+     centrowanie flexem z rodzica nie miało czego centrować — glif uciekał nad kartę. */
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+.skrzynka .os-hint { font-size: 12px; font-weight: 400; color: var(--sk-mute); }
+.skrzynka .os-hint code { background: var(--sk-pill); border-radius: 5px; padding: 1px 7px; font-size: 11px; }
+
+/* ═══ WYSŁANE — karta per delegacja, zwijana jak karty Otrzymanych ═══ */
+.skrzynka .callout[data-callout="delegated"] {
+  background: var(--sk-card);
+  border: 1px solid var(--sk-line);
+  border-left: 4px solid var(--sk-honey);
+  border-radius: 16px;
+  padding: 13px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  mix-blend-mode: normal;
+  --callout-color: 240, 179, 80;
+}
+/* linia tytułu: tytuł po lewej, badge daty wysłania po prawej (przed chevronem folda) */
+.skrzynka .callout[data-callout="delegated"] .callout-title-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.skrzynka .callout[data-callout="delegated"] .callout-title-inner .os-since {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--sk-pill);
+  border-radius: 999px;
+  padding: 2px 10px;
+  color: var(--sk-sub);
+}
+.skrzynka .callout[data-callout="delegated"] .callout-content p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--sk-ink);
+  margin: 6px 0 2px;
+}
+.skrzynka .callout[data-callout="delegated"] .callout-content > :last-child { margin-bottom: 0; }
+.skrzynka .os-wait {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--sk-pill);
+  color: var(--sk-sub);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.skrzynka .os-wait.stale { background: var(--sk-coral); color: #2a2724; }
+
+/* ═══ STAN PUSTY — zielony spokój ═══ */
+.skrzynka .callout[data-callout="inbox-ok"] {
+  background: var(--sk-sage-soft);
+  border: 1px solid #3f5a4a;
+  border-radius: 16px;
+  padding: 10px 18px;
+  mix-blend-mode: normal;
+  --callout-color: 63, 158, 110;
+}
+/* jednolinijkowy stan pusty — Obsidian i tak tworzy pusty blok treści z paddingiem, chowamy */
+.skrzynka .callout[data-callout="inbox-ok"] .callout-content { display: none; }
+.skrzynka .callout[data-callout="inbox-ok"] .callout-title-inner {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sk-sage);
+}

@@ -16,4 +16,4 @@ ostatnia_aktualizacja: {{DATE}}
 
 ---
 
-*Wygenerowano przez /onboarding*
+*Wygenerowano przez /onboard*
