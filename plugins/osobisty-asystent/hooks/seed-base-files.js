@@ -26,7 +26,7 @@ const rulesDir = path.join(projectDir, '.claude', 'rules');
 // Lista plików bazowych do zasiania. Rozszerzalna — dodaj kolejną parę {src, dest}.
 const SEED_FILES = [
   {
-    src: path.join(pluginRoot, 'skills', 'onboarding', 'templates', 'ai-writing-patterns.md'),
+    src: path.join(pluginRoot, 'skills', 'onboard', 'templates', 'ai-writing-patterns.md'),
     dest: path.join(rulesDir, 'content', 'ai-writing-patterns.md'),
   },
 ];
