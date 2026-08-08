@@ -9,7 +9,7 @@ Wszystkie ścieżki są względne do workspace (`$CLAUDE_PROJECT_DIR`).
 | Szablon (workspace) | `Zadania/.szablony/szablon-zadania.md` |
 | Szablon (fallback) | `{baseDir}/templates/szablon-zadania.md` |
 | Folder docelowy | `Zadania/w_trakcie/` |
-| Dashboard | `Zadania/to_do.md` |
+| Dashboard | `Zadania/Dashboard.md` (starsze instalacje: `Zadania/to_do.md` — użyj istniejącego) |
 | Wpisy | `Marketing/wpisy/YYYY/` |
 
 ## Domyślne wartości

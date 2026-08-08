@@ -85,7 +85,7 @@ Jeśli zadanie dotyczy wpisu (słowa: wpis, post, content, publikacja + data):
 
 ### 7. Dodaj do dashboardu
 
-1. Przeczytaj `Zadania/to_do.md`
+1. Przeczytaj `Zadania/Dashboard.md` *(u starszych instalacji: `Zadania/to_do.md` — użyj tego, który istnieje)*
 2. Określ sekcję:
    - **DZISIAJ** → termin = dzisiaj
    - **TEN TYDZIEŃ** → termin 1-7 dni
@@ -116,6 +116,6 @@ Jeśli zadanie dotyczy wpisu (słowa: wpis, post, content, publikacja + data):
 
 - NIE twórz bez nazwy
 - NIE nadpisuj istniejących plików
-- ZAWSZE dodaj do to_do.md
+- ZAWSZE dodaj do Dashboard.md (u starszych instalacji: to_do.md)
 - ZAWSZE ISO format w frontmatter (YYYY-MM-DD)
 - Projekt: link `[[Zadania/projekty/nazwa]]` lub PUSTE (nigdy tekst "brak")

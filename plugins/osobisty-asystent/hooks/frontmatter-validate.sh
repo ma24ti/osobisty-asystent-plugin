@@ -12,7 +12,7 @@ esac
 
 # Pomiń dashboardy, szablony, cykliczne
 case "$FILE" in
-  */.szablony/*|*/to_do.md|*/recurring.md) exit 0 ;;
+  */.szablony/*|*/to_do.md|*/Dashboard.md|*/recurring.md) exit 0 ;;
 esac
 
 # Wyciągnij frontmatter (między pierwszymi dwoma ---)

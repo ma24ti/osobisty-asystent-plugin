@@ -116,7 +116,7 @@ Wybierz JEDNĄ linię w zależności od stanu:
 
 ---
 
-## Struktura `to_do.md` (kolejność blokow)
+## Struktura `Dashboard.md` (kolejność blokow)
 
 ```
 ---

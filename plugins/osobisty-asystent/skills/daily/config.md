@@ -8,7 +8,7 @@ Wszystkie ścieżki względne do workspace (`$CLAUDE_PROJECT_DIR`).
 |-------|---------|
 | aktywne | `Zadania/w_trakcie/` |
 | archiwum | `Zadania/zrobione/` |
-| dashboard | `Zadania/to_do.md` |
+| dashboard | `Zadania/Dashboard.md` (starsze instalacje: `Zadania/to_do.md` — użyj istniejącego) |
 | cykliczne | `Zadania/cykliczne/recurring.md` |
 | czytadelko | `Zasoby/Czytadełko/` |
 

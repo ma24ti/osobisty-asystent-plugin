@@ -18,7 +18,7 @@ Wykonujesz codzienną aktualizację systemu zarządzania zadaniami w Obsidian.
 
 **ŹRÓDŁO PRAWDY:** Checkbox `[x]` w dashboardzie = zadanie wykonane.
 
-1. Przeczytaj `Zadania/to_do.md`
+1. Przeczytaj `Zadania/Dashboard.md` *(u starszych instalacji plik nazywa się `Zadania/to_do.md` — wtedy czytaj i zapisuj TEN istniejący plik, nie twórz drugiego)*
 2. Znajdź wszystkie linie `- [x] [[w_trakcie/nazwa-pliku|`
 3. Dla każdego zaznaczonego pliku:
    - Zmień `status: w_trakcie` → `status: zrobione` w frontmatter
@@ -38,7 +38,7 @@ Wykonujesz codzienną aktualizację systemu zarządzania zadaniami w Obsidian.
    - `co dzień` → zawsze pasuje
    - `[N]. dnia miesiąca` → porównaj N z dniem miesiąca (np. `10. dnia miesiąca` pasuje gdy dziś jest 10.)
    - `ostatni dzień miesiąca` → sprawdź czy jutro jest 1. dzień następnego miesiąca
-4. Sprawdź czy zadanie **już istnieje** w dashboardzie (`to_do.md`) po nazwie — żeby nie duplikować
+4. Sprawdź czy zadanie **już istnieje** w dashboardzie (`Dashboard.md`) po nazwie — żeby nie duplikować
 5. Pasujące zadania → zapisz do listy `cykliczne_dzis` (użyte w SEKCJI 4)
 
 **Bez pytania o potwierdzenie** — harmonogram to decyzja.
@@ -61,7 +61,7 @@ Wykonujesz codzienną aktualizację systemu zarządzania zadaniami w Obsidian.
 
 ---
 
-## SEKCJA 4: Regeneracja to_do.md
+## SEKCJA 4: Regeneracja Dashboard.md
 
 1. Pobierz dzisiejszą datę **i dzień tygodnia z systemu** (nie licz sam!):
    ```bash
@@ -83,7 +83,7 @@ Wykonujesz codzienną aktualizację systemu zarządzania zadaniami w Obsidian.
    - Wpisy cykliczne: `- [ ] 🔁 Nazwa zadania — [emoji] [priorytet]`
    - Jeśli zadanie cykliczne ma Projekt: `- [ ] 🔁 Nazwa zadania — [emoji] [priorytet] — 📁 [projekt]`
 
-5. **Skomponuj zawartość** `Zadania/to_do.md` w tej kolejności (jako jedna operacja zapisu):
+5. **Skomponuj zawartość** `Zadania/Dashboard.md` w tej kolejności (jako jedna operacja zapisu):
 
    a) **Frontmatter:**
       ```yaml
@@ -108,7 +108,7 @@ Wykonujesz codzienną aktualizację systemu zarządzania zadaniami w Obsidian.
 **Potem policz:**
 3. Glob `Zasoby/Czytadełko/*.md` (zostały tylko nieprzeczytane)
 4. Policz unread
-5. W `to_do.md`:
+5. W `Dashboard.md`:
    - Frontmatter: ustaw `czytadelko_unread: N`
    - Po frontmatter, przed nagłówkiem `# TODO`: dodaj lub zaktualizuj linię `📚 **Czytadełko:** N do przeczytania`
    - Jeśli N == 0: nie dodawaj linii Czytadełko
@@ -202,7 +202,7 @@ Kolejność sekcji w raporcie:
    ↓
 📋 Skan zadań w_trakcie/
    ↓
-📝 Regeneracja to_do.md
+📝 Regeneracja Dashboard.md
    ↓
 📅 Kalendarz + sloty
    ↓

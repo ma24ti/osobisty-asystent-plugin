@@ -328,7 +328,7 @@ gdyby onboarding był pomijany.)*
 
 ```
 Zadania/
-├── to_do.md              ← skopiuj z templates/to_do.md, zamień {{DATE}} na dzisiejszą datę YYYY-MM-DD
+├── Dashboard.md          ← skopiuj z templates/Dashboard.md, zamień {{DATE}} na dzisiejszą datę YYYY-MM-DD
 ├── projekty/
 ├── w_trakcie/
 ├── zrobione/
@@ -439,7 +439,7 @@ Wiersz `content/ai-writing-patterns.md` wpisuj ZAWSZE (plik kopiowany bezwarunko
 ```
 - `.claude/` - konfiguracja Claude Code
 - `Zadania/` - system zarządzania zadaniami
-  - `to_do.md` - główna lista zadań
+  - `Dashboard.md` - główna lista zadań
   - `projekty/` - aktywne projekty
   - `w_trakcie/` - zadania w toku
   - `zrobione/` - ukończone zadania

@@ -125,7 +125,7 @@ checkbox user wybiera, co naniesie tryb `apply`. Jeśli zero sygnałów — NIE 
 Jeśli powstały propozycje — wywołaj skill `utworz-zadanie`:
 > tytuł: `🧠 Przejrzyj N propozycji reflect (persona/soul/voice-of-tone)`
 > termin: dziś, priorytet: normalny
-Dzięki temu pamiętasz wrócić — zadanie ląduje w `to_do.md` (przy `/daily` je zobaczysz).
+Dzięki temu pamiętasz wrócić — zadanie ląduje w `Dashboard.md` (przy `/daily` je zobaczysz).
 Hook `SessionStart` (`reflect-pending-notify.js`) dodatkowo zasygnalizuje istnienie
 `_reflect-pending.md` przy starcie sesji.
 
@@ -168,7 +168,7 @@ Pokaż userowi finalny diff każdej zmiany. Po naniesieniu wszystkich — zaktua
 ### 6a. Posprzątaj pending
 Usuń z `_reflect-pending.md` sekcje, które naniosłeś. Niezaznaczone zostają.
 - Jeśli po usunięciu nie ma już żadnej propozycji (`##`) → **skasuj cały plik** (`_reflect-pending.md`)
-  i domknij zadanie-przypomnienie: w `Zadania/to_do.md` zmień `- [ ]` na `- [x]` przy
+  i domknij zadanie-przypomnienie: w `Zadania/Dashboard.md` (u starszych instalacji: `to_do.md`) zmień `- [ ]` na `- [x]` przy
   `przejrzyj-propozycje-reflect`, ustaw `status: zrobione` w pliku zadania.
 - Jeśli zostały niezaznaczone propozycje → plik zostaje (alert hooka dalej będzie je pokazywał).
 

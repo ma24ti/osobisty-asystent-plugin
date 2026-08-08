@@ -157,7 +157,7 @@ wywołaj skill `utworz-zadanie`:
 > tytuł: `🔍 Przejrzyj N nowych kandydatów na skille (skill-scout)` · termin: dziś · priorytet: 🟢 normalny
 > Notatki (H4): ścieżka do raportu `Zasoby/raporty/skill-scout/Raporty/raport-aktualny.html`
 
-To jest siatka bezpieczeństwa — bez zadania w `to_do.md` łatwo zapomnieć o raporcie. Pomiń krok
+To jest siatka bezpieczeństwa — bez zadania w `Dashboard.md` łatwo zapomnieć o raporcie. Pomiń krok
 tylko gdy nowych kandydatów = 0 (nie ma czego przeglądać).
 
 ## Krok 9 — Podsumowanie w czacie
@@ -195,5 +195,5 @@ to zadanie LLM w tym samym przebiegu, nie długi sub-proces). Zasady headless:
 - **CWD musi być rootem vaulta.** Skrypty używają ścieżek względnych (`.claude/...`, `Zasoby/...`).
   W cronie ustaw `CLAUDE_CRON_WORKSPACE` (parser i generator czytają tę zmienną i kotwiczą w nim) —
   tak samo jak `reddit-news`.
-- **Zadanie-przypomnienie (Krok 8)** działa headless — `utworz-zadanie` ląduje w `to_do.md`, więc raport
+- **Zadanie-przypomnienie (Krok 8)** działa headless — `utworz-zadanie` ląduje w `Dashboard.md`, więc raport
   zobaczysz przy `/daily` nawet jeśli scout odpalił się w nocy.
