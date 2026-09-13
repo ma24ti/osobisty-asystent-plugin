@@ -1,6 +1,6 @@
 ---
 name: utworz-zadanie
-description: Tworzy nowe zadanie w systemie Obsidian. Użyj gdy user prosi o dodanie/utworzenie zadania, zapisanie czegoś do zrobienia, lub wspomina o task/todo.
+description: Zakłada plik zadania w vaultcie Obsidian (Zadania, dashboard). Użyj tylko gdy user wprost mówi "do dashboardu", "do vaulta", "zadanie w Obsidianie" albo /utworz-zadanie. NIE uruchamiaj na samo "dodaj zadanie", bo domyślnym miejscem jest Skrzynka Todoista według CLAUDE.md workspace'u.
 argument-hint: "[nazwa] | [priorytet] | [termin] | [projekt]"
 allowed-tools: ["Read", "Write", "Bash", "Edit", "Glob"]
 ---

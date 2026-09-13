@@ -43,6 +43,7 @@ Wszystko przez skrypt `scripts/vps-session.js` (Node, zero zależności):
 | Cel | Komenda |
 |-----|---------|
 | Nowa nazwana sesja | `node scripts/vps-session.js new <nazwa>` |
+| Sesja słuchająca bota Telegram | `node scripts/vps-session.js new <nazwa> --telegram` |
 | Żywe sesje na VPS | `node scripts/vps-session.js list` |
 | Ubij sesję | `node scripts/vps-session.js kill <nazwa>` |
 | Podgląd w terminalu | `node scripts/vps-session.js attach <nazwa>` |

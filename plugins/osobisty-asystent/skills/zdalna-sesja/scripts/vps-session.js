@@ -40,12 +40,19 @@ function validateName(name) {
 }
 
 // Skrypt bash wykonywany na VPS. Nazwa jest już zwalidowana (alfanumeryczna).
-function buildInner(action, name, cfg) {
+function buildInner(action, name, cfg, opts = {}) {
   switch (action) {
-    case 'new':
+    case 'new': {
       // PATH-prefix ~/.local/bin: preferuj natywną instalację Claude (nowszą) nad ewentualnym
       // starym npm-globalem w /usr/bin. Ustawiane w pane, tuż przed exec — niezależne od env tmux servera.
-      return `tmux new -d -s ${name} 'export PATH="$HOME/.local/bin:$PATH"; cd ${cfg.vaultPath} && exec claude --remote-control ${name} --dangerously-skip-permissions'`;
+      // --telegram: sesja słucha bota Telegram (plugin telegram@claude-plugins-official, token w
+      // ~/.claude/channels/telegram/.env na VPS). Jeden token = jedna sesja naraz.
+      // Wlasny katalog stanu (TELEGRAM_STATE_DIR): inne sesje na VPS (Puls, ogolna) uzywaja domyslnego
+      // ~/.claude/channels/telegram bez tokena, wiec ich plugin gasnie od razu i nie wyrzuca tej sesji.
+      const channels = opts.telegram ? ' --channels plugin:telegram@claude-plugins-official' : '';
+      const stateDir = opts.telegram ? ' export TELEGRAM_STATE_DIR="$HOME/.claude/channels/telegram-vps";' : '';
+      return `tmux new -d -s ${name} 'export PATH="$HOME/.local/bin:$PATH";${stateDir} cd ${cfg.vaultPath} && exec claude --remote-control ${name} --dangerously-skip-permissions${channels}'`;
+    }
     case 'list':
       return 'tmux list-sessions 2>/dev/null || echo "(brak aktywnych sesji)"';
     case 'kill':
@@ -61,8 +68,8 @@ function wrapRunAs(command, cfg) {
 }
 
 // Owija wewnętrzny skrypt w base64, żeby uniknąć piekła zagnieżdżonego cytowania ssh → su -c → tmux.
-function buildRemoteCommand(action, name, cfg) {
-  const inner = buildInner(action, name, cfg);
+function buildRemoteCommand(action, name, cfg, opts = {}) {
+  const inner = buildInner(action, name, cfg, opts);
   const encoded = Buffer.from(inner, 'utf8').toString('base64');
   return `echo '${encoded}' | base64 -d | ${wrapRunAs('bash -s', cfg)}`;
 }
@@ -95,10 +102,10 @@ function requireConnection(cfg) {
   }
 }
 
-function runRemote(action, name, cfg, dryRun) {
-  const remoteCommand = buildRemoteCommand(action, name, cfg);
+function runRemote(action, name, cfg, dryRun, opts = {}) {
+  const remoteCommand = buildRemoteCommand(action, name, cfg, opts);
   if (dryRun) {
-    console.log(`# ssh ${cfg.sshTarget}:\n${remoteCommand}\n\n# skrypt wykonywany na VPS:\n${buildInner(action, name, cfg)}`);
+    console.log(`# ssh ${cfg.sshTarget}:\n${remoteCommand}\n\n# skrypt wykonywany na VPS:\n${buildInner(action, name, cfg, opts)}`);
     return;
   }
   execFileSync('ssh', [cfg.sshTarget, remoteCommand], { stdio: 'inherit' });
@@ -107,6 +114,7 @@ function runRemote(action, name, cfg, dryRun) {
 const USAGE = `zdalna-sesja — zdalne sesje Claude Code na VPS
 
   new <nazwa>     nowa nazwana sesja z Remote Control
+                  dodaj --telegram, żeby sesja słuchała bota Telegram
   list            żywe sesje na VPS
   kill <nazwa>    ubij sesję
   attach <nazwa>  komenda do podglądu sesji w terminalu
@@ -116,6 +124,7 @@ const USAGE = `zdalna-sesja — zdalne sesje Claude Code na VPS
 function main(argv) {
   const args = argv.slice(2);
   const dryRun = args.includes('--dry-run');
+  const opts = { telegram: args.includes('--telegram') };
   const positional = args.filter((a) => !a.startsWith('--'));
   const action = positional[0];
   const name = positional[1];
@@ -132,9 +141,10 @@ function main(argv) {
     case 'kill': {
       validateName(name);
       if (!dryRun) requireConnection(cfg);
-      runRemote(action, name, cfg, dryRun);
+      runRemote(action, name, cfg, dryRun, opts);
       if (action === 'new' && !dryRun) {
         console.log(`✅ Sesja "${name}" wystartowała na VPS. Podłącz się z telefonu/weba przez Remote Control (nazwa: ${name}).`);
+        if (opts.telegram) console.log('   Sesja słucha bota Telegram. Pełny transkrypt: Remote Control albo tmux attach.');
       }
       break;
     }
