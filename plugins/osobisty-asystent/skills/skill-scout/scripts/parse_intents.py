@@ -24,6 +24,7 @@ Statystyki idą na stderr.
 """
 
 import os
+import re
 import sys
 import json
 import datetime
@@ -49,6 +50,23 @@ SYSTEM_COMMANDS = {
     '/review', '/status', '/vim', '/model', '/permissions',
     '/terminal-setup', '/listen', '/fast', '/plugin', '/skill-scout',
 }
+
+# Sesje prywatne (modul Zdrowie) nie moga trafic do NOW.md, persona.md ani raportow,
+# bo te pliki jada gitem na GitHub. Sesja jest prywatna, gdy dotyka katalogu Zdrowie
+# w vaultcie albo zrodla na G:, albo uruchamia skill zdrowie. Ustalone 2026-09-11.
+PRIVATE_SESSION_RE = re.compile(
+    r'Centralka[\\/]+Zdrowie|02 Obszary[\\/]+Zdrowie|"skill"\s*:\s*"zdrowie"'
+    r'|<command-name>/zdrowie\b|skills[\\/]+zdrowie'
+)
+
+
+def is_private_session(path):
+    try:
+        with open(path, 'r', encoding='utf-8', errors='replace') as f:
+            return bool(PRIVATE_SESSION_RE.search(f.read()))
+    except OSError:
+        return False
+
 
 # ── Functions ───────────────────────────────────────────────
 
@@ -97,6 +115,9 @@ def get_session_files(sessions_dirs, cutoff):
                 continue
             seen_ids.add(f)
             path = os.path.join(sessions_dir, f)
+            if is_private_session(path):
+                print(f"Pominieto sesje prywatna: {f}", file=sys.stderr)
+                continue
             mtime = datetime.datetime.fromtimestamp(os.path.getmtime(path))
             if mtime >= cutoff:
                 sessions.append((mtime, path))
