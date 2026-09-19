@@ -198,7 +198,7 @@ NA TAPECIE (zaktualizowane):
 
 ## Zasady ogólne
 
-- NOW.md max **120 linii**
+- NOW.md max **10 000 znaków**, kolumna „Uwagi” max 200 znaków; ustalenia starsze niż 7 dni idą do `.claude/referencje/ustalenia-archiwum.md`, nic nie znika bez archiwum
 - **NIE duplikuj** info z innych plików w `.claude/rules/` ładowanych do kontekstu
 - **NIE interpretuj emocji** usera — tylko fakty i explicite statements
 - Confidence **LOW → odrzuć** (nie zapisuj)

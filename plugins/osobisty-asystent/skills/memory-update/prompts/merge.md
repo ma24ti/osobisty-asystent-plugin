@@ -30,6 +30,7 @@ Zaktualizuj NOW.md na podstawie nowych sygnałów z sesji. NOW.md to dynamiczny 
 | Bloker rozwiązany | Usuń natychmiast |
 | Pozycja z "Na tapecie" nieaktualna | Usuń jeśli nie pojawił się ponownie |
 | Wzorzec pracy | Zostaw (trwale, chyba że zmiana) |
+| Wpis w „Ostatnie ustalenia” starszy niż 7 dni | Przenieś słowo w słowo do `.claude/referencje/ustalenia-archiwum.md`, pod nagłówek `## Zdjęte RRRR-MM-DD` na górze pliku. Nigdy nie kasuj bez archiwum |
 
 ### Conflict resolution
 - Nowsze fakty nadpisują starsze (dodaj datę)
@@ -63,7 +64,8 @@ Zaktualizuj NOW.md na podstawie nowych sygnałów z sesji. NOW.md to dynamiczny 
 
 ## Ograniczenia
 
-- **Max 120 linii** — jeśli zbliżasz się do limitu, usuń najstarsze wpisy
+- **Max 10 000 znaków na cały plik** (ok. 3 tys. tokenów; plik ładuje się w każdej sesji). Limit linii nie wystarcza, bo wiersze tabeli rosną wszerz. Przy przekroczeniu najpierw przenieś najstarsze ustalenia do `ustalenia-archiwum.md`, potem skracaj uwagi
+- **Kolumna „Uwagi” w tabeli projektów: max 200 znaków.** Ścieżka do notatki (Warsztat, plan, przekazanie) plus jedno zdanie o następnym kroku albo ostrzeżeniu. Aktualizacja projektu podmienia uwagę, nie dokleja do niej. Treść, której nie ma w żadnej notatce, przenieś słowo w słowo do `ustalenia-archiwum.md`
 - **NIE duplikuj** info z persona.md (styl komunikacji), biznes.md (model biznesowy, stack, platformy), soul.md (charakter AI)
 - **Zaktualizuj timestamp** "Ostatni update" na bieżącą datę i godzinę
 - **Sekcje mogą być puste** — nie usuwaj nagłówków, zostaw `- (brak)` jeśli sekcja jest pusta

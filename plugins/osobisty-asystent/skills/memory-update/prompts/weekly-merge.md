@@ -50,7 +50,7 @@ Przepisz na podstawie tego co **realnie dominowało** w tygodniu (z logów), nie
 | Jednorazowy event (wpis napisany, deploy, nagranie) | **Usuń** — to event log, nie kontekst |
 | Trwała decyzja (cenowa, architekturalna, technologiczna) | **Zostaw** dopóki obowiązuje |
 | Decyzja cofnięta lub zmieniona w tygodniu | **Zastąp** nową decyzją, usuń starą |
-| Ustalenie starsze niż 14 dni | **Usuń** — jeśli nadal ważne, powinno być w uwagach projektu |
+| Ustalenie starsze niż 7 dni | **Przenieś słowo w słowo** do `.claude/referencje/ustalenia-archiwum.md`, pod nagłówek `## Zdjęte RRRR-MM-DD` na górze pliku (najnowsze na górze). Nigdy nie kasuj bez archiwum |
 
 Po cleanup skonsoliduj: wiele ustaleń dot. jednego projektu → jeden wpis.
 
@@ -90,7 +90,9 @@ Po cleanup skonsoliduj: wiele ustaleń dot. jednego projektu → jeden wpis.
 
 ## Ograniczenia
 
-- **Max 120 linii** — weekly powinien ZMNIEJSZAĆ liczbę linii (konsolidacja), nie zwiększać
+- **Max 10 000 znaków na cały plik** (ok. 3 tys. tokenów; plik ładuje się w każdej sesji). Limit linii nie wystarcza, bo wiersze tabeli rosną wszerz. Weekly powinien ZMNIEJSZAĆ objętość, nie zwiększać
+- **Kolumna „Uwagi” w tabeli projektów: max 200 znaków.** Ścieżka do notatki (Warsztat, plan, przekazanie) plus jedno zdanie o następnym kroku albo ostrzeżeniu. Szczegóły, liczby i historia zostają w notatce projektu. Jeśli skracasz uwagę, której treści nie ma w żadnej notatce, przenieś ją słowo w słowo do `ustalenia-archiwum.md`
+- **Po przekroczeniu limitu** najpierw przenieś do archiwum najstarsze ustalenia, potem skracaj uwagi. Nic nie znika bez śladu w archiwum
 - **NIE duplikuj** info z persona.md, biznes.md, soul.md
 - **Zaktualizuj timestamp** na bieżącą datę i godzinę
 - **Sekcje mogą być puste** — nie usuwaj nagłówków, zostaw `- (brak)` jeśli sekcja jest pusta
