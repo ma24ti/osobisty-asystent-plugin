@@ -54,6 +54,13 @@ Przepisz na podstawie tego co **realnie dominowało** w tygodniu (z logów), nie
 
 Po cleanup skonsoliduj: wiele ustaleń dot. jednego projektu → jeden wpis.
 
+### Wyniki analiz asystenta (pola `autor`, `sciezka`)
+
+Zasady jak w `merge.md`, sekcja „Autor i źródło”, plus trzy reguły dla przepisywania:
+- **Znacznik `(wynik analizy, <sciezka>)` przeżywa każdą operację weekly:** konsolidację, skracanie, przepisanie sekcji i podniesienie pewności z MEDIUM na HIGH. Pewność mówi, jak mocno sygnał wynika z logów, a nie kto jest autorem liczby
+- **Konsolidacja wpisów ze znacznikiem niesie wszystkie ich ścieżki.** Liczba bez swojej ścieżki nie wchodzi do wpisu zbiorczego
+- **Sygnał `analiza asystenta` bez `sciezka` nie jest zapisywany**, także po podniesieniu pewności. Wpis sprzed tej reguły, który ma liczbę z analizy bez ścieżki, przenieś słowo w słowo do `ustalenia-archiwum.md`, zamiast przepisywać go jako fakt
+
 ### Sekcja "Blokery"
 - Bloker rozwiązany w tygodniu → **usuń**
 - Bloker nadal otwarty → **zostaw**, opcjonalnie dodaj kontekst (od kiedy blokuje)

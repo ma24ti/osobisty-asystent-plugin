@@ -17,6 +17,12 @@ Zaktualizuj NOW.md na podstawie nowych sygnałów z sesji. NOW.md to dynamiczny 
 - Blokery → sekcja "Blokery"
 - Stack → uwagi przy projekcie lub osobny wpis w "Ostatnie ustalenia"
 
+### Autor i źródło (pola `autor`, `sciezka`)
+- **`autor: "Mateusz"`:** wpis jak dotąd, jako ustalenie, bez znacznika i bez ścieżki. Wypowiedź Mateusza jest źródłem sama w sobie
+- **`autor: "analiza asystenta"` z `sciezka`:** wpis kończy się znacznikiem `(wynik analizy, <sciezka>)`, ścieżka przepisana dosłownie. Przykład: `- 2026-09-21: Marża na towarze 57,5% przy pokryciu 99,8% (wynik analizy, <sciezka>)`
+- **`autor: "analiza asystenta"` bez `sciezka`, albo sygnał bez pola `autor`, który niesie liczbę lub wniosek asystenta: nie zapisuj.** Wypisz go w podsumowaniu jako odrzucony (powód: brak źródła)
+- Znacznik jest częścią wpisu: aktualizacja, skracanie, konsolidacja i przeniesienie do archiwum go nie zdejmują. Liczba ze znacznikiem nie trafia do kolumny „Uwagi” bez niego
+
 ### Aktualizacja (typ: UPDATE)
 - Znajdź istniejący wpis i zaktualizuj status/uwagi
 - NIE duplikuj — jeśli projekt już jest w tabeli, zmień status
@@ -35,6 +41,7 @@ Zaktualizuj NOW.md na podstawie nowych sygnałów z sesji. NOW.md to dynamiczny 
 ### Conflict resolution
 - Nowsze fakty nadpisują starsze (dodaj datę)
 - Nowsza decyzja nadpisuje starą
+- Wypowiedź Mateusza nadpisuje wynik analizy asystenta w tej samej sprawie; wtedy znacznik znika razem ze starą treścią
 - Priorytety: zamień, nie kumuluj (max 5)
 
 ## Format NOW.md

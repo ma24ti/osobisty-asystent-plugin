@@ -24,6 +24,8 @@ Daily wyciąga pojedyncze fakty — "zmienił status X", "dodał feature Y", "zd
 ### 5. Sygnały MEDIUM, które daily pominął
 Daily odrzuca sygnały o niskiej pewności. Weekly może je podnieść, jeśli **ten sam sygnał MEDIUM pojawił się w 2+ różnych dniach** — powtarzalność podnosi pewność.
 
+**Podniesienie pewności nie zmienia autora.** Wynik analizy asystenta powtórzony w dwóch sesjach dalej jest wynikiem analizy: zostaje `autor: "analiza asystenta"` i musi mieć `sciezka`. Autorem staje się Mateusz tylko wtedy, gdy sam go powiedział albo potwierdził w linii `[USER]`.
+
 ## Kategorie sygnałów
 
 1. **PROJEKTY** — zbiorczy status projektu za tydzień (nie atomowe updaty)
@@ -44,6 +46,8 @@ Zwróć JSON array sygnałów:
     "typ": "KONSOLIDACJA",
     "tresc": "Dashboard analityczny: przeszedł z Fazy 3.1 do 3.2, dodano filtr zakresu dat i adaptacyjną granularność wykresu. Faza 3.3 (geografia) zaparkowana.",
     "zrodlo": "logi z 3 sesji + git diff",
+    "autor": "Mateusz",
+    "sciezka": null,
     "pewnosc": "HIGH"
   },
   {
@@ -51,6 +55,8 @@ Zwróć JSON array sygnałów:
     "typ": "NOWY",
     "tresc": "Czytadełko — w NOW.md jako aktywny, zero wzmianek w logach z całego tygodnia",
     "zrodlo": "brak w logach",
+    "autor": "Mateusz",
+    "sciezka": null,
     "pewnosc": "HIGH"
   }
 ]
@@ -61,7 +67,16 @@ Pola:
 - `typ`: `KONSOLIDACJA` | `NOWY` | `UPDATE` | `ZAKONCZONE` | `USUN`
 - `tresc`: zbiorczy opis, 1-3 zdania — kontekst, nie lista zmian
 - `zrodlo`: skąd pochodzi sygnał (`logi`, `git diff`, `brak w logach`, `powtórzenie MEDIUM`)
+- `autor`: `Mateusz` | `analiza asystenta`, według reguły z `extract.md` (sekcja „Autor i źródło”)
+- `sciezka`: ścieżka raportu albo pliku, w którym asystent policzył liczbę lub wniosek; `null`, gdy `autor` to `Mateusz`
 - `pewnosc`: `HIGH` | `MEDIUM`
+
+## Autor i źródło
+
+Obowiązuje reguła z `extract.md`, sekcja „Autor i źródło”. W skrócie:
+- Liczba, kwota, procent albo wniosek z odpowiedzi asystenta, niepotwierdzony przez Mateusza, to `autor: "analiza asystenta"` i wymaga `sciezka` z linii `[PLIK ZAPISANY]` albo z tekstu asystenta. **Bez ścieżki odrzuć.**
+- Wpis w NOW.md ze znacznikiem `(wynik analizy, <ścieżka>)` przy konsolidacji zachowuje `autor: "analiza asystenta"` i tę samą ścieżkę. Konsolidacja kilku takich wpisów niesie wszystkie ich ścieżki.
+- Wpis w NOW.md z liczbą z analizy bez znacznika i bez ścieżki (sprzed tej reguły) nie wraca w sygnale w tej postaci: albo dostaje ścieżkę z logów tygodnia, albo wygeneruj sygnał `USUN` i merge przeniesie wpis słowo w słowo do archiwum.
 
 ## Filtr pewności — inny niż daily
 

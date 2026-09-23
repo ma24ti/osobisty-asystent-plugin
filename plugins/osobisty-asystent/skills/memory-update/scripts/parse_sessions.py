@@ -3,7 +3,8 @@
 parse_sessions.py — Parser logow sesji Claude Code
 
 Wyciaga czysty dialog (user + assistant text) z plikow .jsonl.
-Filtruje noise: tool_use, progress, file-history, krotkie wiadomosci, komendy systemowe.
+Z tool_use zostaja tylko sciezki plikow zapisanych przez Write/Edit (linia [PLIK ZAPISANY]).
+Filtruje noise: reszta tool_use, progress, file-history, krotkie wiadomosci, komendy systemowe.
 
 Usage:
     python3 parse_sessions.py [--since "YYYY-MM-DD HH:MM"] [--days N]
@@ -156,6 +157,23 @@ def extract_text_from_content(content):
     return ''
 
 
+WRITE_TOOLS = {'Write', 'Edit', 'MultiEdit', 'NotebookEdit'}
+
+
+def extract_written_paths(content):
+    """Return file paths from Write/Edit tool_use blocks in assistant content."""
+    paths = []
+    if isinstance(content, list):
+        for block in content:
+            if (isinstance(block, dict) and block.get('type') == 'tool_use'
+                    and block.get('name') in WRITE_TOOLS):
+                inp = block.get('input') or {}
+                p = inp.get('file_path') or inp.get('notebook_path')
+                if p:
+                    paths.append(p)
+    return paths
+
+
 def is_system_command(text):
     """Check if message is a system command or skill invocation."""
     stripped = text.strip()
@@ -207,12 +225,16 @@ def parse_session(path):
                     continue
                 dialog.append(('USER', text.strip()))
 
-            # Assistant messages — only text blocks
+            # Assistant messages: text blocks plus paths of files the assistant wrote.
+            # Sciezki sa potrzebne ekstrakcji: liczba z analizy asystenta wchodzi do NOW.md
+            # tylko ze sciezka do raportu, w ktorym ja policzono. Ustalone 2026-09-23.
             elif entry_type == 'assistant':
                 msg = entry.get('message', {})
                 if not isinstance(msg, dict):
                     continue
                 content = msg.get('content', '')
+                for path_written in extract_written_paths(content):
+                    dialog.append(('PLIK ZAPISANY', path_written))
                 text = extract_text_from_content(content)
                 if not text or len(text.strip()) < 20:
                     continue

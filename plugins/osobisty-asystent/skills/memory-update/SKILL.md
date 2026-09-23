@@ -172,6 +172,9 @@ ZAKTUALIZOWANE:
 
 USUNIĘTE:
 - [kategoria] opis (powód)
+
+ODRZUCONE (wynik analizy bez ścieżki):
+- [kategoria] opis
 ```
 
 ### Weekly:
@@ -202,5 +205,6 @@ NA TAPECIE (zaktualizowane):
 - **NIE duplikuj** info z innych plików w `.claude/rules/` ładowanych do kontekstu
 - **NIE interpretuj emocji** usera — tylko fakty i explicite statements
 - Confidence **LOW → odrzuć** (nie zapisuj)
+- **Liczba albo wniosek z analizy asystenta** (niepowiedziany ani niepotwierdzony przez Mateusza) wchodzi do NOW.md tylko ze ścieżką do raportu i znacznikiem `(wynik analizy, <ścieżka>)`. Brak ścieżki w logu: odrzuć i wypisz w podsumowaniu jako odrzucony. Wypowiedź Mateusza jest źródłem sama w sobie i idzie jako ustalenie bez znacznika. Podniesienie pewności w weekly nie zdejmuje znacznika. Szczegóły: pola `autor` i `sciezka` w `prompts/extract.md`
 - Full auto — **nie pytaj o zatwierdzenie**, po prostu zapisz
 - Cleanup: po zapisie usuń pliki tymczasowe (`rm -f .claude/tmp/mu-*.txt`)
