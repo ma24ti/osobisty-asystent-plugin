@@ -176,15 +176,18 @@ Dopisz **nowych** kandydatów z tego przebiegu (sekcja „nowe" z Kroku 4) do
 ```
 Jeśli plik istnieje — **dołącz** do `proposed`, nie nadpisuj. Slug już obecny → nie duplikuj.
 
-## Krok 8 — Zadanie-przypomnienie (OBOWIĄZKOWE, gdy są nowi kandydaci)
+## Krok 8: zadanie-przypomnienie w Skrzynce Todoista (gdy są nowi kandydaci)
 
-Żeby raport nie zniknął w Zasobach, **zawsze** gdy w tym przebiegu pojawił się ≥1 nowy kandydat,
-wywołaj skill `utworz-zadanie`:
-> tytuł: `🔍 Przejrzyj N nowych kandydatów na skille (skill-scout)` · termin: dziś · priorytet: 🟢 normalny
-> Notatki (H4): ścieżka do raportu `Zasoby/raporty/skill-scout/Raporty/raport-aktualny.html`
+Gdy w tym przebiegu pojawił się co najmniej jeden nowy kandydat, dodaj zadanie do Skrzynki Todoista:
+`POST https://api.todoist.com/api/v1/tasks` bez `project_id`, token z `.env` vaulta przez `wczytaj_env`
+z `.claude/skrypty/todoist_today.py`.
+- `content`: `Przejrzyj N nowych kandydatów na skille (skill-scout)`
+- `due_string`: `today`, `priority`: 1
+- `description`: ścieżka do raportu `Zasoby/raporty/skill-scout/Raporty/raport-aktualny.html`
 
-To jest siatka bezpieczeństwa — bez zadania w `Dashboard.md` łatwo zapomnieć o raporcie. Pomiń krok
-tylko gdy nowych kandydatów = 0 (nie ma czego przeglądać).
+Raport leży w Zasobach i bez przypomnienia łatwo o nim zapomnieć; dashboard vaulta nie przyjmuje zadań,
+a Todoist jest na telefonie. Pomiń krok, gdy nowych kandydatów jest zero. Gdy API nie odpowiada, napisz
+to w podsumowaniu (Krok 9) zamiast zakładać zadanie gdzie indziej.
 
 ## Krok 9 — Podsumowanie w czacie
 
@@ -224,5 +227,5 @@ to zadanie LLM w tym samym przebiegu, nie długi sub-proces). Zasady headless:
 - **CWD musi być rootem vaulta.** Skrypty używają ścieżek względnych (`.claude/...`, `Zasoby/...`).
   W cronie ustaw `CLAUDE_CRON_WORKSPACE` (parser i generator czytają tę zmienną i kotwiczą w nim) —
   tak samo jak `reddit-news`.
-- **Zadanie-przypomnienie (Krok 8)** działa headless — `utworz-zadanie` ląduje w `Dashboard.md`, więc raport
-  zobaczysz przy `/daily` nawet jeśli scout odpalił się w nocy.
+- **Zadanie-przypomnienie (Krok 8)** działa headless: idzie przez API Todoista, więc raport zobaczysz
+  w Todoiście i w `/daily` nawet po nocnym przebiegu. Wymaga tokenu Todoista w `.env` vaulta.
