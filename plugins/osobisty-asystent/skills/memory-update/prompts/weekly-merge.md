@@ -97,6 +97,7 @@ Zasady jak w `merge.md`, sekcja „Autor i źródło”, plus trzy reguły dla p
 
 ## Ograniczenia
 
+- **Zakres NOW.md: czym się teraz zajmuję i gdzie to leży, nigdy statusy dokumentów, materiałów ani spraw projektowych.** Dobry wpis: „REACH dla Pakuły, projekty v0.9 leżą w korzeniu PPWR”. Zły wpis: „M-KART-001 status częściowy, brak deklaracji”, bo należy do rejestru projektu i zestarzeje się w tydzień. Dotyczy wszystkich sekcji, także „Otwarte decyzje” i „Blokery”: wątpliwa wartość w karcie TDS, zdanie w MSDS czy numer wiersza arkusza to sprawa listy projektu, w NOW.md najwyżej jedna linijka „N spraw czeka, lista w <ścieżka>”. Sygnał, który jest samym statusem dokumentu, wypisz w podsumowaniu jako odrzucony (powód: status projektu)
 - **Max 10 000 znaków na cały plik** (ok. 3 tys. tokenów; plik ładuje się w każdej sesji). Limit linii nie wystarcza, bo wiersze tabeli rosną wszerz. Weekly powinien ZMNIEJSZAĆ objętość, nie zwiększać
 - **Kolumna „Uwagi” w tabeli projektów: max 200 znaków.** Ścieżka do notatki (Warsztat, plan, przekazanie) plus jedno zdanie o następnym kroku albo ostrzeżeniu. Szczegóły, liczby i historia zostają w notatce projektu. Jeśli skracasz uwagę, której treści nie ma w żadnej notatce, przenieś ją słowo w słowo do `ustalenia-archiwum.md`
 - **Po przekroczeniu limitu** najpierw przenieś do archiwum najstarsze ustalenia, potem skracaj uwagi. Nic nie znika bez śladu w archiwum
