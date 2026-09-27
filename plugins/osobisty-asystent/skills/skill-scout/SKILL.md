@@ -40,17 +40,42 @@ nie ma materiału, i zakończ.
 Trzy rzeczy, równolegle:
 
 1. **Prośby usera** — `/tmp/scout-intents.json` (lista `{date, time, text}`). To jest materiał do analizy.
-2. **Inwentarz istniejących skilli** — żeby ocenić *nowy skill* vs *update istniejącego*:
+2. **Inwentarz istniejących rozwiązań** — żeby ocenić *nowy skill* vs *update istniejącego* i żeby
+   Krok 2a wiedział, co już wdrożono. Trzy źródła: skille vaulta, skille z pluginów, skrypty pomocnicze.
    ```bash
-   for d in .claude/skills/*/; do
-     name=$(basename "$d")
-     desc=$(grep -m1 '^description:' "$d/SKILL.md" 2>/dev/null | sed 's/^description: *//')
-     echo "$name — $desc"
+   for f in .claude/skills/*/SKILL.md "$HOME"/.claude/plugins/marketplaces/*/plugins/*/skills/*/SKILL.md; do
+     [ -f "$f" ] || continue
+     name=$(basename "$(dirname "$f")")
+     desc=$(grep -m1 '^description:' "$f" 2>/dev/null | sed 's/^description: *//' | cut -c1-300)
+     echo "skill $name — $desc"
+   done
+   for f in .claude/skrypty/*.py; do
+     [ -f "$f" ] || continue
+     echo "skrypt $(basename "$f") — $(grep -m1 -E '^\s*("""|#)' "$f" | sed -E 's/^\s*("""|#) *//' | cut -c1-200)"
    done
    ```
 3. **Plik stanu** — `Zasoby/raporty/skill-scout/_proposed.json` (jeśli istnieje). Lista już zaproponowanych
    kandydatów. Polityka: **zaproponuj raz, nigdy więcej** — kandydat, którego slug już tam jest,
-   NIE wraca do raportu, nawet jeśli dalej się powtarza.
+   NIE wraca do raportu, nawet jeśli dalej się powtarza. Każdy rekord ma pole `status`:
+   `otwarty` (brak pola = otwarty), `wdrozony` albo `odrzucony`. Raport pokazuje tylko otwarte.
+
+## Krok 2a — Przegląd statusów (każdy przebieg, przed klasteryzacją)
+
+Dla **każdego otwartego** rekordu z `_proposed.json` sprawdź w inwentarzu z Kroku 2, czy proces ma już
+rozwiązanie. Wdrożony jest, gdy:
+- istnieje skill o tej nazwie albo skill, którego description obejmuje ten proces (np. kandydat
+  `commit-tygodnia` pokryty przez `porzadki-repo`),
+- dla `type: update`: description skilla z `update_target` opisuje już dodaną funkcję,
+- istnieje skrypt w `.claude/skrypty/`, który robi tę robotę (kandydat nie musiał skończyć jako skill).
+
+Trafienie → ustaw w rekordzie `status: "wdrozony"`, `status_date` (dziś), `status_note`
+(czym pokryty, np. `skill porzadki-repo`). Wątpliwe dopasowanie zostaw otwarte i wymień w Kroku 9.
+Rekordów `odrzucony` nie ruszaj: ten status ustawia wyłącznie user („odrzuć X”, „nie robimy X”),
+z `status_note` podającym powód i datę decyzji. Pole `status_note` przy otwartym rekordzie to
+uwaga usera (np. „czeka na rejestr nazw”); nie kasuj jej.
+
+Zapisz `_proposed.json` od razu po przeglądzie, **przed** generowaniem raportu, żeby generator
+ukrył zamknięte już w tym przebiegu.
 
 ## Krok 3 — Wykryj kandydatów (klasteryzacja)
 
@@ -67,6 +92,7 @@ Szukasz **intencji**, nie dosłownie identycznych zdań: „wrzuć X na Drive i 
 
 **Co NIE jest kandydatem** (odsiej):
 - jednorazowa robota projektowa, kreatywne decyzje, dyskusje, pisanie konkretnego contentu,
+- procesy, których slug albo sens pokrywa się z rekordem `wdrozony` lub `odrzucony` w `_proposed.json`,
 - rzeczy, które już masz jako skill **i wołasz przez `/nazwa`** (to nie ręczna robota — chyba że
   sygnał mówi, że robisz to *obok* skilla, ręcznie → wtedy kandydat na **update**).
 
@@ -165,6 +191,7 @@ tylko gdy nowych kandydatów = 0 (nie ma czego przeglądać).
 Krótko (nie ściana tekstu):
 - ile próśb przeskanowane, z ilu sesji, w jakim oknie,
 - ilu kandydatów (ile nowych), top 1–2 z priorytetem,
+- które rekordy Krok 2a zamknął w tym przebiegu jako wdrożone (slug i czym pokryte) oraz wątpliwe dopasowania,
 - ścieżka do raportu HTML,
 - łączny potencjał oszczędności / tydzień.
 
@@ -175,7 +202,9 @@ Krótko (nie ściana tekstu):
 - **Tylko prośby usera** — sygnałem jest to, co Kacper ZLECA, nie sekwencje narzędzi ani skill-usage.log.
 - **Próg ≥3×** — mniej to szum, nie wzorzec.
 - **Nowe na górze, historia poniżej** — kandydat zgłoszony raz nie wraca na górę, ale zostaje widoczny
-  w sekcji „Wcześniej wytypowane" (`_proposed.json` to pamięć scouta). Nic nie znika z radaru.
+  w sekcji „Wcześniej wytypowane", dopóki jest otwarty (`_proposed.json` to pamięć scouta).
+- **Wdrożone i odrzucone znikają z raportu** — rekord zostaje w `_proposed.json` ze statusem, żeby
+  nie wrócił jako nowy; w raporcie widać tylko ich liczbę w stopce.
 - **Maks. 7 NOWYCH** w sekcji górnej — zwrot z czasu > kompletność. Historia bez limitu.
 - **Zadanie zawsze** gdy ≥1 nowy kandydat — siatka bezpieczeństwa, żeby nie zapomnieć o raporcie.
 - **Nic nie buduj** — scout tylko czyta i raportuje; budowę skilla robisz osobno (np. `/skill-creator`).

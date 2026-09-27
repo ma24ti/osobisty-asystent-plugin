@@ -54,6 +54,7 @@ function card(c, isHistory = false) {
   const slug = c.slug ? `<code class="slug">/${esc(c.slug)}</code>` : '';
   const since = isHistory && c.first_proposed
     ? `<span class="since">typowany od ${fmtDate(c.first_proposed)}</span>` : '';
+  const note = c.status_note ? `<p class="note">${esc(c.status_note)}</p>` : '';
 
   return `<article class="card${isHistory ? ' hist' : ''}" data-prio="${prio}" data-freq="${Number(c.freq) || 0}">
     <div class="body">
@@ -69,6 +70,7 @@ function card(c, isHistory = false) {
         <span>⏱ ${fmtMin(c.minutes_per_run)}/raz</span>
         <span>💰 ~${fmtMin(c.saved_per_week_min)}/tydz</span>
       </div>
+      ${note}
       ${c.what ? `<p class="summary">${esc(c.what)}</p>` : ''}
       ${evidence ? `<details class="ev-wrap"><summary>Dowód (${c.evidence.length})</summary>${evidence}</details>` : ''}
     </div>
@@ -136,6 +138,8 @@ const CSS = `
   .m-up { color: var(--primary-strong); }
 
   .summary { color: #d4d4d8; font-size: 14.5px; line-height: 1.62; }
+  .note { color: var(--primary-strong); font: 600 13.5px/1.5 Inter; margin-bottom: 10px; }
+  .closed { color: var(--faint); font-size: 12.5px; margin-top: 28px; }
 
   .ev-wrap { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
   .ev-wrap summary { cursor: pointer; color: var(--muted); font: 600 12.5px/1 Inter; }
@@ -201,7 +205,11 @@ function main() {
   const freshSlugs = new Set(fresh.map((c) => c.slug));
   // HISTORIA: wcześniej wytypowane (poniżej). Czytane z _proposed.json PRZED dopisaniem nowych.
   // Odsiewamy te, które i tak są w sekcji "nowe", żeby nie dublować.
-  const history = loadHistory().filter((c) => !freshSlugs.has(c.slug)).sort(byPrio);
+  // Wdrożone i odrzucone (status w _proposed.json) znikają z raportu; zostaje tylko ich liczba w stopce.
+  const isOpen = (c) => !c.status || c.status === 'otwarty';
+  const all = loadHistory().filter((c) => !freshSlugs.has(c.slug));
+  const history = all.filter(isOpen).sort(byPrio);
+  const closed = all.filter((c) => !isOpen(c));
 
   const intents = data.stats?.intents ?? '–';
   const freshSaved = fresh.reduce((s, c) => s + (Number(c.saved_per_week_min) || 0), 0);
@@ -217,6 +225,11 @@ function main() {
     ? `<div class="section-h">📋 Wcześniej wytypowane (${history.length})</div>
        <div id="hist-cards">${history.map((c) => card(c, true)).join('\n')}</div>`
     : '';
+  const nDone = closed.filter((c) => c.status === 'wdrozony').length;
+  const nRejected = closed.length - nDone;
+  const closedLine = closed.length
+    ? `<p class="closed">Ukryte jako zamknięte: ${nDone} wdrożonych, ${nRejected} odrzuconych (status w _proposed.json).</p>`
+    : '';
 
   const body = `
     <div class="overline">Skill Scout</div>
@@ -228,12 +241,13 @@ function main() {
       <div class="stat"><b>${savedLabel}</b><span class="lab">Potencjał z nowych / tydzień</span></div>
     </div>
     ${freshSection}
-    ${histSection}`;
+    ${histSection}
+    ${closedLine}`;
 
   const html = page(`Skill Scout · ${data.date || todayISO()}`, body);
   writeFileSync(join(RAPORTY, 'raport-aktualny.html'), html);
   writeFileSync(join(RAPORTY, `${data.date || todayISO()}.html`), html);
-  console.error(`→ raport zapisany: Zasoby/raporty/skill-scout/Raporty/raport-aktualny.html (${fresh.length} nowych, ${history.length} w historii)`);
+  console.error(`→ raport zapisany: Zasoby/raporty/skill-scout/Raporty/raport-aktualny.html (${fresh.length} nowych, ${history.length} otwartych w historii, ${closed.length} zamkniętych ukrytych)`);
 }
 
 main();
